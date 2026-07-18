@@ -24,5 +24,70 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ... rest of the schema will be in maestro-backend/prisma/schema.prisma ...
+// CRM Models
+model Customer {
+  id        String   @id @default(uuid())
+  tenantId  String
+  name      String
+  document  String?
+  email     String?
+  phone     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Financial Ledger (Double-Entry)
+model Account {
+  id        String        @id @default(uuid())
+  tenantId  String
+  name      String
+  type      AccountType
+  entries   LedgerEntry[]
+}
+
+enum AccountType {
+  ASSET
+  LIABILITY
+  EQUITY
+  REVENUE
+  EXPENSE
+}
+
+model LedgerTransaction {
+  id          String        @id @default(uuid())
+  tenantId    String
+  description String
+  date        DateTime
+  status      String        @default("POSTED") // PENDING, POSTED, REVERSED
+  metadata    Json?
+  entries     LedgerEntry[]
+  createdAt   DateTime      @default(now())
+}
+
+model LedgerEntry {
+  id            String             @id @default(uuid())
+  transactionId String
+  transaction   LedgerTransaction  @relation(fields: [transactionId], references: [id])
+  accountId     String
+  account       Account            @relation(fields: [accountId], references: [id])
+  type          EntryType
+  amount        Int                // Armazenado em centavos
+}
+
+enum EntryType {
+  DEBIT
+  CREDIT
+}
+
+// Theming Engine
+model TenantUI {
+  id          String   @id @default(uuid())
+  tenantId    String   @unique
+  themeMode   String   @default("system")
+  colors      Json?
+  typography  Json?
+  logoUrl     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
 ```
