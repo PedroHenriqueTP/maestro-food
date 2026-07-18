@@ -1,0 +1,247 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL") // URL do Supabase
+}
+
+model Tenant {
+  id        String   @id @default(uuid())
+  name      String
+  document  String?  @unique
+  subdomain String   @unique
+  isActive  Boolean  @default(true)
+  
+  users           User[]
+  categories      Category[]
+  products        Product[]
+  modifierGroups  ModifierGroup[]
+  orders          Order[]
+  customers       Customer[]
+  auditLogs       AuditLog[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("tenants")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      Role     @default(OPERATOR)
+  
+  tenantId  String?
+  tenant    Tenant?  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  auditLogs AuditLog[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+  @@map("users")
+}
+
+enum Role {
+  ADMIN_SAAS
+  OWNER
+  MANAGER
+  OPERATOR
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  action    String   
+  entity    String   
+  entityId  String
+  details   Json?    
+  
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([entity, entityId])
+  @@map("audit_logs")
+}
+
+model Category {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  sortOrder   Int      @default(0)
+  
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  products    Product[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([tenantId])
+  @@map("categories")
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  price       Decimal  @db.Decimal(10, 2)
+  sku         String?
+  isActive    Boolean  @default(true)
+  
+  categoryId  String?
+  category    Category? @relation(fields: [categoryId], references: [id])
+  
+  tenantId    String
+  tenant      Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  modifierGroups ProductModifierGroup[]
+  orderItems     OrderItem[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([categoryId])
+  @@map("products")
+}
+
+model ModifierGroup {
+  id          String   @id @default(uuid())
+  name        String   
+  minRequired Int      @default(0)
+  maxAllowed  Int      @default(1)
+  
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  modifiers   Modifier[]
+  products    ProductModifierGroup[]
+
+  @@index([tenantId])
+  @@map("modifier_groups")
+}
+
+model ProductModifierGroup {
+  productId       String
+  modifierGroupId String
+  
+  product         Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  modifierGroup   ModifierGroup @relation(fields: [modifierGroupId], references: [id], onDelete: Cascade)
+
+  @@id([productId, modifierGroupId])
+  @@map("product_modifier_groups")
+}
+
+model Modifier {
+  id              String   @id @default(uuid())
+  name            String
+  price           Decimal  @default(0.00) @db.Decimal(10, 2)
+  
+  modifierGroupId String
+  modifierGroup   ModifierGroup @relation(fields: [modifierGroupId], references: [id], onDelete: Cascade)
+
+  orderItemMods   OrderItemModifier[]
+
+  @@index([modifierGroupId])
+  @@map("modifiers")
+}
+
+model Customer {
+  id        String   @id @default(uuid())
+  name      String
+  phone     String?
+  
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  orders    Order[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, phone])
+  @@map("customers")
+}
+
+model Order {
+  id          String      @id @default(uuid())
+  orderNumber String      
+  status      OrderStatus @default(NEW)
+  channel     Channel     
+  totalAmount Decimal     @db.Decimal(10, 2)
+  
+  metadata    Json?       
+
+  tenantId    String
+  tenant      Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  customerId  String?
+  customer    Customer?   @relation(fields: [customerId], references: [id])
+
+  items       OrderItem[]
+
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([tenantId])
+  @@index([createdAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  quantity  Int
+  unitPrice Decimal @db.Decimal(10, 2)
+  notes     String? 
+  
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  modifiers OrderItemModifier[]
+
+  @@map("order_items")
+}
+
+model OrderItemModifier {
+  id          String  @id @default(uuid())
+  quantity    Int     @default(1)
+  unitPrice   Decimal @db.Decimal(10, 2)
+  
+  orderItemId String
+  orderItem   OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+  
+  modifierId  String
+  modifier    Modifier  @relation(fields: [modifierId], references: [id], onDelete: Restrict)
+
+  @@map("order_item_modifiers")
+}
+
+enum OrderStatus {
+  NEW
+  PREPARING
+  READY
+  DELIVERED
+  CANCELED
+}
+
+enum Channel {
+  IFOOD
+  RAPPI
+  UBER_EATS
+  DELIVERY_DIRETO
+  POS
+}
