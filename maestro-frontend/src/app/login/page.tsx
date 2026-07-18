@@ -1,25 +1,22 @@
 "use client";
 import React, { useState } from "react";
-import axios from "axios";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setSuccess(false);
+    setLoading(true);
 
-    try {
-      await axios.post("/api/v1/auth/login", { email, password });
-      setSuccess(true);
-    } catch (err: any) {
-      setError("401 Unauthorized - Credenciais inválidas ou acesso negado.");
-    }
+    // Free Access Bypassed (Simulando request)
+    setTimeout(() => {
+      router.push("/dashboard");
+    }, 800);
   };
 
   return (
@@ -47,47 +44,24 @@ export default function Login() {
 
         <form onSubmit={handleLogin} className="flex w-full flex-col gap-8">
           <div className="flex flex-col">
-            <label className="mb-2 text-[10px] uppercase tracking-widest text-[#aa8c2c]">Identificação</label>
+            <label className="mb-2 text-[10px] uppercase tracking-widest text-[#aa8c2c]">Identificação (Free Access)</label>
             <input
-              type="email"
+              type="text"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="fineline-input px-2 py-2 text-sm text-[#f1e5ac]"
-              placeholder="admin@maestro.com"
-              required
-            />
-          </div>
-          <div className="flex flex-col">
-            <label className="mb-2 text-[10px] uppercase tracking-widest text-[#aa8c2c]">Código de Acesso</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="fineline-input px-2 py-2 text-sm text-[#f1e5ac]"
-              placeholder="••••••••"
-              required
+              placeholder="Acesso Livre Ativado"
             />
           </div>
           
           <button
             type="submit"
-            className="mt-6 w-full border border-[#d4af37] bg-transparent px-4 py-3 text-sm tracking-[0.2em] text-[#f1e5ac] uppercase transition-all duration-500 hover:bg-[#d4af37]/10 hover:shadow-[0_0_15px_rgba(212,175,55,0.2)]"
+            disabled={loading}
+            className="mt-6 w-full border border-[#d4af37] bg-transparent px-4 py-3 text-sm tracking-[0.2em] text-[#f1e5ac] uppercase transition-all duration-500 hover:bg-[#d4af37]/10 hover:shadow-[0_0_15px_rgba(212,175,55,0.2)] disabled:opacity-50"
           >
-            Acessar Sistema
+            {loading ? "Autenticando..." : "Acessar Sistema"}
           </button>
         </form>
-
-        {error && (
-          <div className="mt-8 w-full border border-red-900/50 bg-red-950/20 p-4 text-center text-xs tracking-wider text-red-500/80">
-            {error}
-          </div>
-        )}
-        
-        {success && (
-          <div className="mt-8 w-full border border-[#d4af37]/50 bg-[#d4af37]/10 p-4 text-center text-xs tracking-wider text-[#d4af37]">
-            Acesso concedido. Iniciando orquestração.
-          </div>
-        )}
       </div>
     </div>
   );
