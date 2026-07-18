@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import axios from "axios";
+import Image from "next/image";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -14,40 +15,55 @@ export default function Login() {
     setSuccess(false);
 
     try {
-      // Simula a interceptação Axios para 401 Unauthorized
       await axios.post("/api/v1/auth/login", { email, password });
       setSuccess(true);
     } catch (err: any) {
-      // Forçando o erro 401 para teste de dopamina do usuário
-      setError("401 Unauthorized - O token é inválido ou está ausente.");
+      setError("401 Unauthorized - Credenciais inválidas ou acesso negado.");
     }
   };
 
   return (
-    <div className="flex h-screen w-full items-center justify-center bg-black">
-      <div className="neon-glow flex w-full max-w-md flex-col items-center justify-center rounded-xl border border-emerald-500/50 bg-black/80 p-8 shadow-lg backdrop-blur-sm">
-        <h1 className="neon-text mb-6 text-4xl font-bold tracking-wider text-emerald-400">
-          MAESTRO
-        </h1>
-        <form onSubmit={handleLogin} className="flex w-full flex-col gap-4">
+    <div className="flex h-screen w-full items-center justify-center bg-[#050505] relative overflow-hidden">
+      {/* Subtle background glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#d4af37] opacity-[0.03] rounded-full blur-[100px] pointer-events-none"></div>
+      
+      <div className="fineline-border premium-glow z-10 flex w-full max-w-md flex-col items-center justify-center bg-black/60 p-10 backdrop-blur-md">
+        
+        <div className="mb-8 flex flex-col items-center">
+          <Image 
+            src="/maestro_logo.png" 
+            alt="Maestro Logo" 
+            width={80} 
+            height={80} 
+            className="mb-4 opacity-90 drop-shadow-[0_0_8px_rgba(212,175,55,0.4)]"
+          />
+          <h1 className="premium-text text-3xl font-light tracking-[0.2em] uppercase">
+            MAESTRO
+          </h1>
+          <p className="mt-2 text-xs font-light tracking-[0.3em] text-[#aa8c2c] uppercase">
+            Gestão Premium
+          </p>
+        </div>
+
+        <form onSubmit={handleLogin} className="flex w-full flex-col gap-8">
           <div className="flex flex-col">
-            <label className="mb-2 text-sm text-gray-300">Email</label>
+            <label className="mb-2 text-[10px] uppercase tracking-widest text-[#aa8c2c]">Identificação</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="rounded bg-gray-900 px-4 py-2 text-white border border-gray-700 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-colors"
+              className="fineline-input px-2 py-2 text-sm text-[#f1e5ac]"
               placeholder="admin@maestro.com"
               required
             />
           </div>
           <div className="flex flex-col">
-            <label className="mb-2 text-sm text-gray-300">Senha</label>
+            <label className="mb-2 text-[10px] uppercase tracking-widest text-[#aa8c2c]">Código de Acesso</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="rounded bg-gray-900 px-4 py-2 text-white border border-gray-700 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-colors"
+              className="fineline-input px-2 py-2 text-sm text-[#f1e5ac]"
               placeholder="••••••••"
               required
             />
@@ -55,21 +71,21 @@ export default function Login() {
           
           <button
             type="submit"
-            className="neon-glow mt-4 w-full rounded bg-emerald-500 px-4 py-2 font-bold text-black transition-all hover:bg-emerald-400"
+            className="mt-6 w-full border border-[#d4af37] bg-transparent px-4 py-3 text-sm tracking-[0.2em] text-[#f1e5ac] uppercase transition-all duration-500 hover:bg-[#d4af37]/10 hover:shadow-[0_0_15px_rgba(212,175,55,0.2)]"
           >
-            ENTRAR
+            Acessar Sistema
           </button>
         </form>
 
         {error && (
-          <div className="mt-6 w-full rounded border border-red-500 bg-red-900/30 p-4 text-center text-red-400">
+          <div className="mt-8 w-full border border-red-900/50 bg-red-950/20 p-4 text-center text-xs tracking-wider text-red-500/80">
             {error}
           </div>
         )}
         
         {success && (
-          <div className="mt-6 w-full rounded border border-emerald-500 bg-emerald-900/30 p-4 text-center text-emerald-400">
-            Login simulado com sucesso!
+          <div className="mt-8 w-full border border-[#d4af37]/50 bg-[#d4af37]/10 p-4 text-center text-xs tracking-wider text-[#d4af37]">
+            Acesso concedido. Iniciando orquestração.
           </div>
         )}
       </div>

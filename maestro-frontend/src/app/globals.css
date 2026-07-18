@@ -1,25 +1,50 @@
 @import "tailwindcss";
 
 @theme {
-  --color-emerald-500: #10b981;
-  --color-emerald-400: #34d399;
-  --color-emerald-neon: #50C878;
+  --color-gold-500: #d4af37;
+  --color-gold-400: #f1e5ac;
+  --color-gold-300: #fcf8e3;
+  --color-gold-600: #aa8c2c;
+  --color-onyx: #0a0a0a;
 }
+
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Inter:wght@300;400&display=swap');
 
 body {
-  background-color: #000000;
-  color: #ffffff;
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: #050505;
+  color: #f1e5ac;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.02em;
 }
 
-.neon-glow {
-  box-shadow: 0 0 15px rgba(16, 185, 129, 0.4), 0 0 30px rgba(16, 185, 129, 0.2);
+.fineline-border {
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  transition: all 0.4s ease;
 }
 
-.neon-glow:hover {
-  box-shadow: 0 0 25px rgba(16, 185, 129, 0.6), 0 0 40px rgba(16, 185, 129, 0.3);
+.fineline-border:hover, .fineline-border:focus-within {
+  border: 1px solid rgba(212, 175, 55, 0.7);
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.1);
 }
 
-.neon-text {
-  text-shadow: 0 0 10px rgba(80, 200, 120, 0.8);
+.premium-glow {
+  box-shadow: 0 0 30px rgba(212, 175, 55, 0.05);
+}
+
+.premium-text {
+  font-family: 'Cinzel', serif;
+  background: linear-gradient(135deg, #f1e5ac, #d4af37, #aa8c2c);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.fineline-input {
+  border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+  background: transparent;
+  transition: all 0.3s ease;
+}
+
+.fineline-input:focus {
+  border-bottom: 1px solid rgba(212, 175, 55, 0.9);
+  outline: none;
 }
