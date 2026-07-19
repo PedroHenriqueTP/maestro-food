@@ -10,6 +10,15 @@ export interface ScoutDiff {
   codeAfter: string;
 }
 
+export interface MarketInsight {
+  id: string;
+  competitor: string;
+  insightType: 'PRICE_DROP' | 'NEW_FEATURE' | 'DELIVERY_SPEED';
+  description: string;
+  recommendedAction: string;
+  timestamp: string;
+}
+
 @Injectable()
 export class IntelligenceService {
   getPendingDiffs(): ScoutDiff[] {
@@ -31,6 +40,27 @@ export class IntelligenceService {
         impact: '+45% throughput em análise batch',
         codeBefore: `for (const record of records) {\n  await this.analyze(record);\n}`,
         codeAfter: `await Promise.all(records.map(record => this.analyze(record)));`,
+      }
+    ];
+  }
+
+  getMarketInsights(): MarketInsight[] {
+    return [
+      {
+        id: 'ins-001',
+        competitor: 'Burguer King (Local)',
+        insightType: 'PRICE_DROP',
+        description: 'Concorrente reduziu o preço do Combo de Casal em 15% nas últimas 2 horas.',
+        recommendedAction: 'Ativar cupom de Flash Sale de 10% no Marketplace via n8n.',
+        timestamp: new Date().toISOString(),
+      },
+      {
+        id: 'ins-002',
+        competitor: 'iFood (Região Central)',
+        insightType: 'DELIVERY_SPEED',
+        description: 'Tempo médio de entrega da região subiu para 55 minutos devido à chuva.',
+        recommendedAction: 'Acionar taxa dinâmica (+R$ 4,00) e notificar clientes sobre possível atraso.',
+        timestamp: new Date(Date.now() - 3600000).toISOString(),
       }
     ];
   }

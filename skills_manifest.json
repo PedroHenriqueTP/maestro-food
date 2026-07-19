@@ -1,0 +1,41 @@
+{
+  "version": "1.0",
+  "project": "Maestro Food",
+  "skills": [
+    {
+      "id": "order-orchestrator",
+      "name": "Order Orchestrator",
+      "description": "Gerencia o ciclo de vida dos pedidos com BullMQ, Supabase e notificações em tempo real.",
+      "path": ".agents/skills/order-orchestrator/SKILL.md",
+      "tags": ["backend", "bullmq", "supabase", "foodservice"]
+    },
+    {
+      "id": "kitchen-ops",
+      "name": "Kitchen Operations",
+      "description": "Regras para displays operacionais e baixa de inventário/Opex.",
+      "path": ".agents/skills/kitchen-ops/SKILL.md",
+      "tags": ["inventory", "opex", "nestjs"]
+    },
+    {
+      "id": "frontend-specialist",
+      "name": "Frontend Specialist",
+      "description": "Mantém o padrão arquitetural Black Gold, Liquid UI, framer-motion e zustand.",
+      "path": ".agents/skills/frontend-specialist/SKILL.md",
+      "tags": ["frontend", "ui", "ux", "gsap", "nextjs"]
+    },
+    {
+      "id": "grok-reviewer",
+      "name": "Grok Reviewer",
+      "description": "Atuar como inteligência Grok independente para revisar arquitetura, código, compliance e performance.",
+      "path": ".agents/skills/grok-reviewer/SKILL.md",
+      "tags": ["review", "compliance", "performance", "architecture", "security"]
+    },
+    {
+      "id": "hermes-ui-ux",
+      "name": "Hermes UI/UX Master",
+      "description": "Elevar UI/UX a nível enterprise/profissional, garantindo consistência visual, usabilidade e brand premium.",
+      "path": ".agents/skills/hermes-ui-ux/SKILL.md",
+      "tags": ["frontend", "ui", "ux", "design-system", "accessibility"]
+    }
+  ]
+}

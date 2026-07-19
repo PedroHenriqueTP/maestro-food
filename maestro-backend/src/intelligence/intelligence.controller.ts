@@ -5,8 +5,13 @@ import { IntelligenceService } from './intelligence.service';
 export class IntelligenceController {
   constructor(private readonly intelligenceService: IntelligenceService) {}
 
-  @Get('diffs/pending')
+  @Get('diffs')
   getPendingDiffs() {
     return this.intelligenceService.getPendingDiffs();
+  }
+
+  @Get('insights')
+  getMarketInsights() {
+    return this.intelligenceService.getMarketInsights();
   }
 }
