@@ -1,0 +1,16 @@
+{
+  "name": "maestro-agents",
+  "version": "1.0.0",
+  "description": "The Autonomous Hive",
+  "scripts": {
+    "test:qa": "playwright test",
+    "janitor:format": "prettier --write ../maestro-frontend/src ../maestro-backend/src",
+    "janitor:deps": "depcheck ../maestro-frontend && depcheck ../maestro-backend"
+  },
+  "dependencies": {
+    "@playwright/test": "^1.40.0",
+    "depcheck": "^1.4.7",
+    "eslint": "^8.56.0",
+    "prettier": "^3.1.1"
+  }
+}

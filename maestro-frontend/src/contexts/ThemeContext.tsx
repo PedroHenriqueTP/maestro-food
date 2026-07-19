@@ -20,12 +20,12 @@ type ThemeContextType = {
 };
 
 const defaultTenantUI: TenantUI = {
-  themeMode: "light",
+  themeMode: "dark",
   colors: {
-    primary: "#4F46E5",
-    secondary: "#10B981",
-    background: "#F3F4F6",
-    text: "#111827",
+    primary: "#D4AF37", // Gold
+    secondary: "#1A1A1A", // Dark Gray
+    background: "#0B0C10", // Deep Black
+    text: "#F3F4F6", // Off-white
   },
 };
 

@@ -321,3 +321,50 @@ model PredictiveInsight {
   @@map("predictive_insights")
 }
 
+// ==========================================
+// OPEX & MARKETING MODULES
+// ==========================================
+
+model Supplier {
+  id          String   @id @default(uuid())
+  tenantId    String
+  name        String
+  category    String   // ex: Fachadas, Embalagens, Freelancers
+  contact     String?
+  rating      Int      @default(5)
+  
+  budgets     MarketingBudget[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([tenantId])
+  @@map("suppliers")
+}
+
+model MarketingBudget {
+  id          String   @id @default(uuid())
+  tenantId    String
+  description String
+  amount      Decimal  @db.Decimal(10, 2)
+  status      BudgetStatus @default(PENDING)
+  roiEstimate Decimal? @db.Decimal(10, 2)
+  
+  supplierId  String?
+  supplier    Supplier? @relation(fields: [supplierId], references: [id])
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([supplierId])
+  @@map("marketing_budgets")
+}
+
+enum BudgetStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  EXECUTED
+}
+

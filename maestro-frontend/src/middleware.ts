@@ -19,7 +19,8 @@ export const config = {
 
 export async function middleware(request: NextRequest) {
   const host = request.headers.get('host') || '';
-  const subdomain = host.split('.')[0];
+  const hostWithoutPort = host.split(':')[0];
+  const subdomain = hostWithoutPort.split('.')[0];
   
   // Extrai o tenantId: Tenta ler o header injetado ou resolve o subdomínio no Edge Config em tempo O(1)
   let tenantId = request.headers.get('x-tenant-id');

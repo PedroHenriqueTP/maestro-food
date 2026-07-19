@@ -26,15 +26,15 @@ export async function POST(request: Request) {
       });
 
       // 1.2 Configurar a Identidade Visual (Theming)
-      // Como o tema inicial padrão pode ser escuro, definimos o "Black Neon"
+      // Como o tema inicial padrão pode ser escuro, definimos o "Black Gold"
       await tx.tenantUI.create({
         data: {
           tenantId: newTenant.id,
           themeMode: "dark",
           colors: {
-            primary: "#10B981", // Um verde vibrante para combinar com o Neon
-            secondary: "#4F46E5",
-            background: "#14151A",
+            primary: "#D4AF37", // Dourado refinado
+            secondary: "#1A1A1A",
+            background: "#0B0C10",
             text: "#FFFFFF"
           },
         }

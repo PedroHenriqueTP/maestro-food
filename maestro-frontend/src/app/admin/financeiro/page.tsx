@@ -1,40 +1,23 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { FinancialSummaryCard } from "@/components/financial/FinancialSummaryCard";
-import { TransactionTable, Transaction } from "@/components/financial/TransactionTable";
-import { TransactionModal } from "@/components/financial/TransactionModal";
 import { apiClient } from "@/lib/api-client";
-import { AIRecommendationCard } from "@/components/dashboard/AIRecommendationCard";
 
 export default function FinanceDashboard() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [balance, setBalance] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchDashboardData = async () => {
     setIsLoading(true);
     try {
-      // Em um MVP real, estas chamadas apontariam para o NestJS 
-      // Por agora, mockamos o tempo de resposta se o backend não estiver rodando,
-      // mas deixamos a chamada engatilhada.
       try {
         const balanceData: any = await apiClient('/ledger/accounts/caixa/balance');
         setBalance(balanceData.balance);
       } catch (e) {
-        console.warn("Backend offline, mockando balance.", e);
         setBalance(1524000); // 15.240,00
       }
-
-      // Simulando fetch de transações (se falhar usa mock)
-      const mockTx: Transaction[] = [
-        { id: "1", date: new Date().toISOString(), description: "Venda Salão #104", type: "CREDIT", amount: 25000, status: "POSTED" },
-        { id: "2", date: new Date(Date.now() - 86400000).toISOString(), description: "Pagamento Fornecedor (Carnes)", type: "DEBIT", amount: 150000, status: "POSTED" },
-      ];
-      setTransactions(mockTx);
     } catch (error) {
-      console.error("Erro ao carregar dados financeiros", error);
+      console.error("Erro ao carregar dados", error);
     } finally {
       setIsLoading(false);
     }
@@ -44,89 +27,55 @@ export default function FinanceDashboard() {
     fetchDashboardData();
   }, []);
 
-  const handleTransactionSuccess = () => {
-    setIsModalOpen(false);
-    // Refresh da tabela e saldos
-    fetchDashboardData();
-  };
-
-  // Formatação em Reais
   const formatValue = (cents: number) => {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cents / 100);
   };
 
+  if (isLoading) {
+    return <div className="p-8 text-white">Carregando dashboard...</div>;
+  }
+
   return (
-    <div className="min-h-screen p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="min-h-screen p-8 bg-[#0B0C10] text-gray-300">
+      <div className="max-w-4xl mx-auto space-y-8">
         
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">Painel Financeiro</h1>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              Visão consolidada do motor contábil (Partida Dobrada)
-            </p>
+        <div className="border-b border-white/10 pb-6">
+          <h1 className="text-4xl font-bold text-white tracking-tighter">Painel Financeiro Base</h1>
+          <p className="text-gray-400 mt-2">Validação de rotas e funcionalidades do MVP.</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="p-6 bg-white/5 border border-white/10 rounded-xl">
+            <h3 className="text-sm font-medium text-gray-400">Caixa Consolidado</h3>
+            <p className="text-3xl font-bold text-[#D4AF37] mt-2">{formatValue(balance)}</p>
           </div>
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 transition-transform hover:scale-105"
-            style={{ backgroundColor: "var(--color-primary)" }}
-          >
-            <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
-            </svg>
-            Nova Transação
-          </button>
+
+          <div className="p-6 bg-white/5 border border-white/10 rounded-xl">
+            <h3 className="text-sm font-medium text-gray-400">Ações Rápidas</h3>
+            <button className="mt-4 w-full py-2 bg-[#D4AF37] text-[#0B0C10] font-bold rounded-lg hover:bg-[#F3E5AB] transition-colors">
+              Nova Transação Teste
+            </button>
+          </div>
         </div>
 
-        {/* KPI Cards */}
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          <FinancialSummaryCard 
-            title="Caixa Consolidado" 
-            value={formatValue(balance)} 
-            description="Saldo real validado por Partida Dobrada"
-            trend="up"
-          />
-          <FinancialSummaryCard 
-            title="Receita do Dia" 
-            value={formatValue(25000)} 
-            description="Até o momento"
-            trend="up"
-          />
-          <FinancialSummaryCard 
-            title="Contas a Pagar (Hoje)" 
-            value={formatValue(150000)} 
-            description="2 boletos vencendo hoje"
-            trend="down"
-          />
+        <div className="p-6 bg-white/5 border border-white/10 rounded-xl">
+          <h2 className="text-xl font-bold text-white mb-4">Status da Infraestrutura</h2>
+          <ul className="space-y-3 text-sm">
+            <li className="flex justify-between">
+              <span>Edge Middleware (O(1) Routing):</span>
+              <span className="text-green-400 font-bold">Ativo</span>
+            </li>
+            <li className="flex justify-between">
+              <span>Backend Connection (NestJS):</span>
+              <span className="text-yellow-400 font-bold">Mocked (Local)</span>
+            </li>
+            <li className="flex justify-between">
+              <span>Tenant ID Injetado:</span>
+              <span className="text-green-400 font-bold">dev-tenant-1234</span>
+            </li>
+          </ul>
         </div>
-
-        {/* AI Insight Area (Cérebro Preditivo) */}
-        <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300 fill-mode-both">
-          <AIRecommendationCard 
-            insight={{
-              id: "insight-001",
-              title: "Anomalia de Custo Detectada: Bacon",
-              description: "O custo médio de insumos relacionados a Carnes subiu 15% nas últimas 3 semanas. Sugerimos ajustar o preço do 'Combo Supremo' em R$ 3,00 para proteger a sua margem alvo de 20%.",
-              actionType: "PRICE_ADJUSTMENT",
-              severity: "HIGH"
-            }} 
-          />
-        </div>
-
-        {/* Table Area */}
-        <div>
-          <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Últimas Movimentações (Ledger)</h2>
-          <TransactionTable transactions={transactions} isLoading={isLoading} />
-        </div>
-
       </div>
-
-      <TransactionModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        onSuccess={handleTransactionSuccess} 
-      />
     </div>
   );
 }

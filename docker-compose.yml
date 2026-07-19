@@ -1,0 +1,135 @@
+version: '3.8'
+
+services:
+  # 1. Banco de Dados Relacional (PostgreSQL)
+  postgres:
+    image: postgres:15-alpine
+    container_name: maestro-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-maestro}
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    networks:
+      - maestro_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 2. Cache e Filas (Redis)
+  redis:
+    image: redis:7-alpine
+    container_name: maestro-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./data/redis:/data
+    networks:
+      - maestro_net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 3. Banco de Dados Vetorial para IA (Qdrant)
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: maestro-qdrant
+    ports:
+      - "6333:6333" # HTTP API
+      - "6334:6334" # gRPC API
+    volumes:
+      - ./data/qdrant:/qdrant/storage
+    networks:
+      - maestro_net
+
+  # 4. Orquestrador de Automação (n8n)
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: maestro-n8n
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - NODE_ENV=production
+      - WEBHOOK_URL=http://localhost:5678/
+      - GENERIC_TIMEZONE=America/Sao_Paulo
+    volumes:
+      - ./data/n8n:/home/node/.n8n
+    networks:
+      - maestro_net
+
+  # 5. Core API (Maestro Backend NestJS)
+  maestro-backend:
+    build:
+      context: ./maestro-backend
+      dockerfile: Dockerfile
+    container_name: maestro-backend
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/maestro?schema=public
+      - REDIS_URL=redis://redis:6379
+      - QDRANT_URL=http://qdrant:6333
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - maestro_net
+
+  # 6. Painel de Controle (Maestro Frontend Next.js)
+  maestro-frontend:
+    build:
+      context: ./maestro-frontend
+      dockerfile: Dockerfile
+    container_name: maestro-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://localhost:3001
+    depends_on:
+      - maestro-backend
+    networks:
+      - maestro_net
+
+  # 7. O Hive (Loop de Autonomia dos Agentes)
+  maestro-agents:
+    build:
+      context: ./maestro-agents
+      dockerfile: Dockerfile
+    container_name: maestro-agents
+    environment:
+      - NODE_ENV=production
+      # Permite que os testes E2E do Playwright enxerguem o frontend via rede do Docker
+      - PLAYWRIGHT_TEST_BASE_URL=http://maestro-frontend:3000
+    depends_on:
+      - maestro-frontend
+      - n8n
+    volumes:
+      - ./maestro-frontend:/app/maestro-frontend
+      - ./maestro-backend:/app/maestro-backend
+    networks:
+      - maestro_net
+
+# Volumes nomeados removidos pois agora usamos bind mounts no diretório ./data
+# volumes:
+#   postgres_data:
+#   redis_data:
+#   qdrant_data:
+#   n8n_data:
+
+networks:
+  maestro_net:
+    driver: bridge
