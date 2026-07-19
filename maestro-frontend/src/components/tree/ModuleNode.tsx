@@ -9,16 +9,26 @@ interface ModuleNodeProps {
 }
 
 export function ModuleNode({ moduleId }: ModuleNodeProps) {
-  const { modules, toggleModule } = useTreeStore();
+  const { modules, toggleModule, scrollDepth } = useTreeStore();
   const mod = modules[moduleId];
 
   if (!mod) return null;
 
+  // Calcula o efeito de decomposição 3D baseado no scroll
+  const zOffset = scrollDepth * 50; 
+  const yOffset = scrollDepth * 20;
+
   return (
     <motion.div 
+      layout
       initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={{ scale: 1.05 }}
+      animate={{ 
+        opacity: 1, 
+        y: yOffset,
+        z: zOffset,
+        rotateX: scrollDepth * 10 
+      }}
+      whileHover={{ scale: 1.05, zIndex: 50 }}
       onClick={() => toggleModule(moduleId)}
       className={`cursor-pointer p-6 rounded-2xl border backdrop-blur-md transition-all ${
         mod.active 

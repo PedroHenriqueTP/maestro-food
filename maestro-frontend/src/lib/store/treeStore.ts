@@ -10,15 +10,18 @@ interface ModuleConfig {
 interface TreeState {
   tenantId: string | null;
   coreHealth: 'OPTIMAL' | 'DEGRADED';
+  scrollDepth: number;
   modules: Record<string, ModuleConfig>;
   setTenantId: (id: string) => void;
   toggleModule: (id: string) => void;
   updateCoreHealth: (status: 'OPTIMAL' | 'DEGRADED') => void;
+  setScrollDepth: (depth: number) => void;
 }
 
 export const useTreeStore = create<TreeState>((set) => ({
   tenantId: null,
   coreHealth: 'OPTIMAL',
+  scrollDepth: 0,
   modules: {
     financeiro: { id: 'financeiro', name: 'Financeiro', active: true, color: '#D4AF37' },
     opex: { id: 'opex', name: 'Fornecedores (Opex)', active: false, color: '#50C878' },
@@ -37,5 +40,6 @@ export const useTreeStore = create<TreeState>((set) => ({
     }
   })),
 
-  updateCoreHealth: (status) => set({ coreHealth: status })
+  updateCoreHealth: (status) => set({ coreHealth: status }),
+  setScrollDepth: (depth) => set({ scrollDepth: depth })
 }));
