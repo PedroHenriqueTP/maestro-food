@@ -19,6 +19,15 @@ export interface MarketInsight {
   timestamp: string;
 }
 
+export interface Recommendation {
+  id: string;
+  name: string;
+  price: number;
+  imageUrl: string;
+  intelligenceReason: string;
+  badges: string[];
+}
+
 @Injectable()
 export class IntelligenceService {
   getPendingDiffs(): ScoutDiff[] {
@@ -61,6 +70,27 @@ export class IntelligenceService {
         description: 'Tempo médio de entrega da região subiu para 55 minutos devido à chuva.',
         recommendedAction: 'Acionar taxa dinâmica (+R$ 4,00) e notificar clientes sobre possível atraso.',
         timestamp: new Date(Date.now() - 3600000).toISOString(),
+      }
+    ];
+  }
+
+  getPersonalizedRecommendations(): Recommendation[] {
+    return [
+      {
+        id: 'rec-001',
+        name: 'Wagyu Supreme Trufado',
+        price: 129.90,
+        imageUrl: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&q=80',
+        intelligenceReason: 'Alta demanda na sua região por ingredientes premium (+42% hoje).',
+        badges: ['Mais Vendido', 'Recomendado pela IA']
+      },
+      {
+        id: 'rec-002',
+        name: 'Trio Mini-Burgers Artesanais',
+        price: 89.90,
+        imageUrl: 'https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&q=80',
+        intelligenceReason: 'Excelente opção para casais (ticket médio elevado na última hora).',
+        badges: ['Ideal para Dois']
       }
     ];
   }

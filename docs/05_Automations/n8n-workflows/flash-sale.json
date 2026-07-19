@@ -1,0 +1,75 @@
+{
+  "name": "Maestro - Flash Sale Explosão",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "trigger-flash-sale",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "name": "Webhook (NestJS Fire-and-Forget)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [ 250, 300 ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.body.urgency}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "name": "If Urgency is High",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [ 500, 300 ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.twilio.com/2010-04-01/Accounts/TWILIO_SID/Messages.json",
+        "authentication": "basicAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "To",
+              "value": "whatsapp:{{$json.body.managerPhone}}"
+            },
+            {
+              "name": "From",
+              "value": "whatsapp:+14155238886"
+            },
+            {
+              "name": "Body",
+              "value": "🚨 Maestro AI: Flash Sale Ativada! A demanda local para {{$json.body.productName}} subiu severamente. Prepare a cozinha."
+            }
+          ]
+        }
+      },
+      "name": "WhatsApp (Manager)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [ 800, 200 ]
+    }
+  ],
+  "connections": {
+    "Webhook (NestJS Fire-and-Forget)": {
+      "main": [
+        [ { "node": "If Urgency is High", "type": "main", "index": 0 } ]
+      ]
+    },
+    "If Urgency is High": {
+      "main": [
+        [ { "node": "WhatsApp (Manager)", "type": "main", "index": 0 } ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

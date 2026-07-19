@@ -1,104 +1,91 @@
-import Link from "next/link";
-import React from "react";
+"use client";
 
-export default function Home() {
+import React from 'react';
+import { useIntelligence } from '@/lib/hooks/useIntelligence';
+import { FlashSaleBanner } from '@/components/marketplace/FlashSaleBanner';
+import { PersonalizedRecommendations } from '@/components/marketplace/PersonalizedRecommendations';
+import { ProductCard } from '@/components/marketplace/ProductCard';
+import { motion } from 'framer-motion';
+
+// Mock do catálogo principal
+const CATALOG = [
+  { id: 'cat-1', name: 'Smash Clássico', price: 35.90, desc: 'Pão batata, duplo smash 90g, queijo cheddar.', imageUrl: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&q=80' },
+  { id: 'cat-2', name: 'Batata Rústica', price: 22.00, desc: 'Com alecrim e alho confit.', imageUrl: 'https://images.unsplash.com/photo-1576107232684-1279f390859f?auto=format&fit=crop&q=80' },
+  { id: 'cat-3', name: 'Milkshake de Pistache', price: 28.50, desc: 'Sorvete artesanal, calda de frutas vermelhas.', imageUrl: 'https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&q=80' },
+  { id: 'cat-4', name: 'Combo Ouro', price: 85.00, desc: 'Smash Clássico + Rústica + Milkshake.', badges: ['-15% OFF'], imageUrl: 'https://images.unsplash.com/photo-1594212691516-436fec6143b6?auto=format&fit=crop&q=80' },
+];
+
+export default function MarketplaceHome() {
+  const { recommendations, loading } = useIntelligence();
+
+  const handleAddToCart = (id: string) => {
+    // Integração futura com o Store/Cart do Zustand
+    console.log('Added to cart:', id);
+  };
+
   return (
-    <div className="min-h-screen bg-[#0B0C10] text-gray-300 font-sans selection:bg-[#D4AF37] selection:text-[#0B0C10] overflow-x-hidden relative">
-      
-      {/* Background Decorativo (Black Gold Glow) */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-[500px] opacity-10 pointer-events-none">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#D4AF37] to-transparent blur-[120px] rounded-full mix-blend-screen"></div>
-      </div>
-
-      <nav className="w-full flex justify-between items-center px-8 py-6 max-w-7xl mx-auto z-10 relative border-b border-white/5">
-        <div className="text-2xl font-black text-white tracking-tighter">
-          MAESTRO
-        </div>
-        <div className="space-x-6 text-sm font-medium">
-          <Link href="/onboarding" className="text-gray-400 hover:text-[#D4AF37] transition-colors">Setup</Link>
-          <Link href="/admin/financeiro" className="text-gray-400 hover:text-[#D4AF37] transition-colors">Dashboard</Link>
+    <div className="min-h-screen bg-[#050505] text-white font-sans pb-24">
+      {/* Top Navbar */}
+      <nav className="sticky top-0 z-50 bg-[#050505]/80 backdrop-blur-md border-b border-white/10 px-6 py-4 flex justify-between items-center">
+        <h1 className="text-2xl font-black text-[#D4AF37] uppercase tracking-widest font-serif">Maestro</h1>
+        <div className="flex gap-4">
+          <button className="relative w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors">
+            <span className="text-xl">🛒</span>
+            <span className="absolute -top-1 -right-1 bg-[#D4AF37] text-black text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+              0
+            </span>
+          </button>
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto px-8 py-20 lg:py-32 relative z-10">
-        
-        {/* Hero Section */}
-        <div className="text-center max-w-4xl mx-auto space-y-10">
-          <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-[#D4AF37]/20 backdrop-blur-md">
-            <span className="w-2 h-2 rounded-full bg-[#D4AF37] animate-pulse"></span>
-            <span className="text-xs font-bold uppercase tracking-widest text-[#D4AF37]">Maestro OS Enterprise</span>
-          </div>
+      <main className="max-w-7xl mx-auto px-6 mt-8">
+        {/* Flash Sale Banner */}
+        <FlashSaleBanner 
+          title="Gold Rush"
+          description="Aproveite nossos combos executivos com desconto exclusivo pelas próximas horas."
+          discount="20%"
+          timeRemaining="02:14:59"
+          onAction={() => alert('Scroll to Promos')}
+        />
 
-          <h1 className="text-6xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500 tracking-tighter leading-tight">
-            O Padrão Ouro do <br />
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#D4AF37] to-[#F3E5AB]">FoodService.</span>
-          </h1>
+        {/* Personalized Recommendations (Intelligence Inject) */}
+        {!loading && <PersonalizedRecommendations recommendations={recommendations} onAddToCart={handleAddToCart} />}
 
-          <p className="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed">
-            Contabilidade de partida dobrada, inteligência artificial preditiva e roteamento com latência O(1) na Borda. Construído para restaurantes que não brincam em serviço.
-          </p>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-5 pt-8">
-            <Link 
-              href="/onboarding" 
-              className="group relative flex items-center justify-center px-8 py-4 rounded-lg font-bold text-[#0B0C10] bg-gradient-to-r from-[#D4AF37] to-[#F3E5AB] hover:from-[#F3E5AB] hover:to-[#D4AF37] hover:scale-105 transition-all shadow-[0_0_30px_rgba(212,175,55,0.2)] overflow-hidden"
-            >
-              <div className="absolute inset-0 w-full h-full bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-in-out"></div>
-              Configurar Operação
-            </Link>
-            
-            <Link 
-              href="/admin/financeiro" 
-              className="px-8 py-4 rounded-lg font-bold text-gray-300 bg-white/5 hover:bg-white/10 hover:text-white border border-white/10 transition-all backdrop-blur-sm"
-            >
-              Acessar Painel
-            </Link>
-          </div>
-        </div>
-
-        {/* Feature Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-32">
-          {/* Feature 1 */}
-          <div className="p-8 rounded-2xl bg-white/5 border border-white/5 hover:border-[#D4AF37]/30 transition-colors group">
-            <div className="w-12 h-12 rounded-lg bg-[#D4AF37]/10 flex items-center justify-center mb-6 text-[#D4AF37]">
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
+        {/* Catálogo Principal (Masonry/Grid) */}
+        <div className="mt-16">
+          <div className="flex justify-between items-end mb-8 border-b border-white/10 pb-4">
+            <h2 className="text-3xl font-bold font-serif">Catálogo <span className="text-gray-500">Completo</span></h2>
+            <div className="flex gap-2">
+              {['Burgers', 'Porções', 'Bebidas'].map((cat) => (
+                <button key={cat} className="px-4 py-2 rounded-full border border-white/10 text-sm hover:border-[#D4AF37] hover:text-[#D4AF37] transition-colors">
+                  {cat}
+                </button>
+              ))}
             </div>
-            <h3 className="text-xl font-bold text-white mb-3">Latência Zero</h3>
-            <p className="text-gray-400 text-sm leading-relaxed">
-              Resolução de Multi-Tenancy em O(1) no Vercel Edge Runtime. Seus clientes nunca esperam pela validação de infraestrutura.
-            </p>
           </div>
 
-          {/* Feature 2 */}
-          <div className="p-8 rounded-2xl bg-white/5 border border-white/5 hover:border-[#D4AF37]/30 transition-colors group">
-            <div className="w-12 h-12 rounded-lg bg-[#D4AF37]/10 flex items-center justify-center mb-6 text-[#D4AF37]">
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-bold text-white mb-3">Double-Entry Ledger</h3>
-            <p className="text-gray-400 text-sm leading-relaxed">
-              Motor contábil com auditoria e precisão transacional. Cada centavo debitado é rastreado por partida dobrada.
-            </p>
-          </div>
-
-          {/* Feature 3 */}
-          <div className="p-8 rounded-2xl bg-white/5 border border-white/5 hover:border-[#D4AF37]/30 transition-colors group">
-            <div className="w-12 h-12 rounded-lg bg-[#D4AF37]/10 flex items-center justify-center mb-6 text-[#D4AF37]">
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-bold text-white mb-3">Cérebro Preditivo</h3>
-            <p className="text-gray-400 text-sm leading-relaxed">
-              A Inteligência Artificial atua nos bastidores alertando sobre custos e recomendando ações precisas para salvar o seu lucro.
-            </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {CATALOG.map((item, i) => (
+              <motion.div 
+                key={item.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+              >
+                <ProductCard 
+                  id={item.id}
+                  name={item.name}
+                  price={item.price}
+                  description={item.desc}
+                  imageUrl={item.imageUrl}
+                  badges={item.badges}
+                  onAdd={handleAddToCart}
+                />
+              </motion.div>
+            ))}
           </div>
         </div>
       </main>
-
     </div>
   );
 }
