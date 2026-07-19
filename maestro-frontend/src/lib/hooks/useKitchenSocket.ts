@@ -1,67 +1,86 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { io, Socket } from 'socket.io-client';
+import { supabase } from '../supabase';
 
 export interface KitchenOrder {
   id: string;
   items: string[];
-  status: 'PENDING' | 'PREPARING' | 'READY';
+  status: 'PENDING' | 'PREPARING' | 'READY' | 'DELIVERING' | 'COMPLETED';
   createdAt: string;
   urgencyLevel: 'NORMAL' | 'HIGH' | 'CRITICAL';
 }
 
 export function useKitchenSocket() {
-  const [socket, setSocket] = useState<Socket | null>(null);
   const [orders, setOrders] = useState<KitchenOrder[]>([]);
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    // Em produção, esta URL viria do process.env
-    const socketInstance = io('http://localhost:3001/kitchen', {
-      transports: ['websocket'],
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
-    });
+    // 1. Fetch initial state
+    const fetchOrders = async () => {
+      // Como não temos a DB configurada, vamos usar Mocks e focar na conexão do channel
+      setOrders([
+        {
+          id: 'K-001',
+          items: ['1x Smash Clássico', '1x Fritas'],
+          status: 'PREPARING',
+          createdAt: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
+          urgencyLevel: 'NORMAL',
+        },
+        {
+          id: 'K-002',
+          items: ['3x Wagyu Supreme Trufado (Flash Sale)'],
+          status: 'PENDING',
+          createdAt: new Date().toISOString(),
+          urgencyLevel: 'HIGH',
+        },
+      ]);
+    };
 
-    socketInstance.on('connect', () => {
-      setIsConnected(true);
-      console.log('✅ KDS WebSockets Conectado');
-    });
+    fetchOrders();
 
-    socketInstance.on('disconnect', () => {
-      setIsConnected(false);
-      console.log('❌ KDS WebSockets Desconectado');
-    });
-
-    socketInstance.on('sync_orders', (data: KitchenOrder[]) => {
-      setOrders(data);
-    });
-
-    socketInstance.on('new_order', (order: KitchenOrder) => {
-      // Toca um som de alerta para novo pedido (se o browser permitir)
-      try {
-        const audio = new Audio('/alert.mp3');
-        audio.play().catch(() => {});
-      } catch (e) {}
-    });
-
-    setSocket(socketInstance);
+    // 2. Subscribe to Supabase Realtime
+    const channel = supabase
+      .channel('public:orders')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'orders' },
+        (payload) => {
+          console.log('Realtime Order Change:', payload);
+          // Em um DB real, atualizaríamos o estado aqui
+          // setOrders(prev => ... )
+          
+          if (payload.eventType === 'INSERT') {
+            try {
+              const audio = new Audio('/alert.mp3');
+              audio.play().catch(() => {});
+            } catch (e) {}
+          }
+        }
+      )
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          setIsConnected(true);
+          console.log('✅ Supabase KDS Realtime Conectado');
+        } else {
+          setIsConnected(false);
+        }
+      });
 
     return () => {
-      socketInstance.disconnect();
+      supabase.removeChannel(channel);
     };
   }, []);
 
-  const updateOrderStatus = (id: string, status: 'PREPARING' | 'READY') => {
+  const updateOrderStatus = async (id: string, status: 'PREPARING' | 'READY') => {
     // Optimistic UI Update
     setOrders((prev) => 
       prev.map(o => o.id === id ? { ...o, status } : o)
     );
     
-    if (socket) {
-      socket.emit('update_status', { id, status });
-    }
+    // Fallback Mock: Se fosse real fariamos:
+    // await supabase.from('orders').update({ status }).eq('id', id);
+    console.log(`[Supabase Mock] Order ${id} updated to ${status}`);
   };
 
   return {

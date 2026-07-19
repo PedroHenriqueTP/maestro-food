@@ -1,52 +1,63 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { io, Socket } from 'socket.io-client';
+import { supabase } from '../supabase';
 import { KitchenOrder } from './useKitchenSocket';
 
 export function useWaiterSocket() {
-  const [socket, setSocket] = useState<Socket | null>(null);
   const [orders, setOrders] = useState<KitchenOrder[]>([]);
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    // Mesma URL do gateway, mas filtraremos o uso no front
-    const socketInstance = io('http://localhost:3001/kitchen', {
-      transports: ['websocket'],
-      reconnectionAttempts: 10, // Garçom se move muito, mais tentativas
-      reconnectionDelay: 1000,
-    });
+    // 1. Fetch initial state
+    const fetchOrders = async () => {
+      // Usando Mocks em vez do BD real por enquanto
+      setOrders([]);
+    };
 
-    socketInstance.on('connect', () => {
-      setIsConnected(true);
-      console.log('✅ Waiter WebSockets Conectado');
-    });
+    fetchOrders();
 
-    socketInstance.on('disconnect', () => {
-      setIsConnected(false);
-      console.log('❌ Waiter WebSockets Desconectado');
-    });
-
-    socketInstance.on('sync_orders', (data: KitchenOrder[]) => {
-      setOrders(data);
-    });
-
-    setSocket(socketInstance);
+    // 2. Subscribe to Supabase Realtime (Filtrando apenas READY e DELIVERING se fosse no BD real)
+    const channel = supabase
+      .channel('public:orders:waiter')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'orders', filter: 'status=in.(READY,DELIVERING)' },
+        (payload) => {
+          console.log('Realtime Waiter Change:', payload);
+          // Em um DB real, atualizaríamos o estado aqui
+        }
+      )
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          setIsConnected(true);
+          console.log('✅ Supabase Waiter Realtime Conectado');
+        } else {
+          setIsConnected(false);
+        }
+      });
 
     return () => {
-      socketInstance.disconnect();
+      supabase.removeChannel(channel);
     };
   }, []);
 
-  const claimOrder = (id: string) => {
+  const claimOrder = async (id: string) => {
     // Optimistic UI
     setOrders((prev) => prev.map(o => o.id === id ? { ...o, status: 'DELIVERING' } : o));
-    socket?.emit('claim_order', { id });
+    
+    // Supabase DB Call
+    // await supabase.from('orders').update({ status: 'DELIVERING' }).eq('id', id);
+    console.log(`[Supabase Mock] Order ${id} claimed by Waiter`);
   };
 
-  const completeOrder = (id: string) => {
+  const completeOrder = async (id: string) => {
+    // Optimistic UI
     setOrders((prev) => prev.map(o => o.id === id ? { ...o, status: 'COMPLETED' } : o));
-    socket?.emit('complete_order', { id });
+    
+    // Supabase DB Call
+    // await supabase.from('orders').update({ status: 'COMPLETED' }).eq('id', id);
+    console.log(`[Supabase Mock] Order ${id} completed by Waiter`);
   };
 
   return {
