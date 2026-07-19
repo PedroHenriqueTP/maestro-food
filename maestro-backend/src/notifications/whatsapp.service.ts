@@ -16,7 +16,7 @@ export class WhatsappService {
       template: 'onboarding_welcome_v1',
       variables: {
         tenant_id: tenantId,
-        subdomain_url: \`https://\${tenantId}.maestro.app\`,
+        subdomain_url: `https://${tenantId}.maestro.app`,
         temp_password: Math.random().toString(36).slice(-8)
       }
     };

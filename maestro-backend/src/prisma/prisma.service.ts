@@ -28,21 +28,13 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       query: {
         $allModels: {
           async $allOperations({ args, query }) {
-            // Este não é o código exato de execução em uma única transação garantida no DB,
-            // mas representa a abstração. Na prática com PostgreSQL e Prisma,
-            // a maneira mais segura é executar uma query raw `SET LOCAL app.current_tenant_id = $1`
-            // dentro de um prisma.$transaction interactivo.
-            // Aqui estamos mockando a abstração para a arquitetura Genesis Iteration 7.1.
-            
-            /* Exemplo real de implementação no Prisma 5+:
-            return prisma.$transaction(async (tx) => {
-              await tx.$executeRaw\`SET LOCAL app.current_tenant_id = \${tenantId}\`;
+            // Implementação real da Blindagem RLS:
+            // Isso garante que cada transação assuma o contexto isolado no PostgreSQL
+            // NOTA: Para RLS ter efeito, a string DATABASE_URL do prisma não pode ser de superuser.
+            return (this as any).$transaction(async (tx: any) => {
+              await tx.$executeRaw`SET LOCAL app.current_tenant_id = ${tenantId}`;
               return query(args);
             });
-            */
-           
-            // Para o contexto do MVP:
-            return query(args);
           },
         },
       },

@@ -10,9 +10,9 @@ export class N8nService {
    * Não bloqueia a thread de execução do NestJS aguardando resposta da automação.
    */
   dispatchToWebhook(workflowEndpoint: string, payload: any): void {
-    const targetUrl = \`\${this.n8nWebhookUrl}/\${workflowEndpoint}\`;
+    const targetUrl = `${this.n8nWebhookUrl}/${workflowEndpoint}`;
     
-    this.logger.log(\`[n8n-Egress] Disparando evento assíncrono para: \${workflowEndpoint}\`);
+    this.logger.log(`[n8n-Egress] Disparando evento assíncrono para: ${workflowEndpoint}`);
     
     // Fire-and-forget simulado usando fetch assíncrono sem await bloqueante
     fetch(targetUrl, {
@@ -24,7 +24,7 @@ export class N8nService {
     }).catch(err => {
       // O catch previne Unhandled Promise Rejections caso o n8n esteja offline,
       // mas não trava o processamento do cliente que já recebeu HTTP 200.
-      this.logger.warn(\`[n8n-Egress] Falha silenciosa ao despachar webhook: \${err.message}\`);
+      this.logger.warn(`[n8n-Egress] Falha silenciosa ao despachar webhook: ${err.message}`);
     });
   }
 }

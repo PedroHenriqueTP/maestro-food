@@ -32,7 +32,7 @@ export class BillingController {
       return res.status(HttpStatus.OK).json({ received: true });
     } catch (error: any) {
       this.logger.error(`Webhook validation falhou: ${error.message}`);
-      return res.status(HttpStatus.BAD_REQUEST).send(\`Webhook Error: \${error.message}\`);
+      return res.status(HttpStatus.BAD_REQUEST).send(`Webhook Error: ${error.message}`);
     }
   }
 }
