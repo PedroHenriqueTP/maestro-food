@@ -12,9 +12,10 @@ export default function WaiterMobileView() {
   const [selectedTable, setSelectedTable] = useState<string | null>(null);
 
   // Estados de Checkout
-  const [checkoutStep, setCheckoutStep] = useState<'select' | 'payment' | 'success'>('select');
+  const [checkoutStep, setCheckoutStep] = useState<'select' | 'payment' | 'split' | 'success'>('select');
   const [checkoutTable, setCheckoutTable] = useState<string | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<'credit' | 'debit' | 'pix' | 'cash' | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<'credit' | 'debit' | 'pix' | 'cash' | 'split' | null>(null);
+  const [splitCount, setSplitCount] = useState<number>(2);
   const [isProcessing, setIsProcessing] = useState(false);
 
   const readyOrders = orders.filter(o => o.status === 'READY');
@@ -138,27 +139,30 @@ export default function WaiterMobileView() {
 
         {/* TAB: CONTA (CHECKOUT) */}
         {activeTab === 'conta' && (
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="space-y-6">
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="space-y-6 pb-6">
             
             {checkoutStep === 'select' && (
               <>
                 <h2 className="text-[#D4AF37] text-sm font-black uppercase tracking-widest mb-4 flex items-center gap-2">
-                  <Wallet className="w-5 h-5" /> Fechar Conta
+                  <Wallet className="w-5 h-5" /> Contas em Aberto
                 </h2>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 gap-4">
                   {mesas.filter(m => m.status === 'ocupada').map(mesa => (
                     <button 
                       key={mesa.id} 
-                      onClick={() => { setCheckoutTable(mesa.id); setCheckoutStep('payment'); }}
-                      className="aspect-square rounded-3xl bg-[#1A1814] border-2 border-[#D4AF37]/30 text-[#D4AF37] flex flex-col items-center justify-center transition-transform active:scale-95 shadow-lg relative overflow-hidden"
+                      onClick={() => { setCheckoutTable(mesa.id); setCheckoutStep('payment'); setPaymentMethod(null); }}
+                      className="aspect-square rounded-3xl bg-[#1A1814] border-2 border-[#D4AF37]/30 text-[#D4AF37] flex flex-col items-center justify-center transition-transform active:scale-95 shadow-lg relative overflow-hidden group"
                     >
-                      <span className="text-2xl font-black">{mesa.id}</span>
-                      <span className="text-xs font-bold text-gray-400 mt-1">R$ 145,90</span>
-                      <div className="absolute top-0 right-0 w-8 h-8 bg-[#D4AF37]/10 rounded-full blur-md"></div>
+                      <span className="text-4xl font-black">{mesa.id}</span>
+                      <span className="text-sm font-bold text-gray-300 mt-2">R$ 145,90</span>
+                      <div className="absolute top-0 right-0 w-12 h-12 bg-[#D4AF37]/10 rounded-full blur-xl group-hover:bg-[#D4AF37]/20 transition-colors"></div>
                     </button>
                   ))}
                   {mesas.filter(m => m.status === 'ocupada').length === 0 && (
-                    <div className="col-span-3 text-center text-gray-500 py-10">Nenhuma mesa ocupada.</div>
+                    <div className="col-span-2 text-center text-gray-500 py-10 border border-white/5 rounded-3xl bg-[#14151A]/50">
+                      <CheckCircle2 className="w-12 h-12 mx-auto mb-4 opacity-50 text-green-500" />
+                      <p className="font-bold uppercase tracking-widest text-sm">Nenhuma conta pendente</p>
+                    </div>
                   )}
                 </div>
               </>
@@ -167,20 +171,24 @@ export default function WaiterMobileView() {
             {checkoutStep === 'payment' && checkoutTable && (
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-3xl font-black text-[#D4AF37]">Mesa {checkoutTable}</h2>
-                  <button onClick={() => setCheckoutStep('select')} className="px-4 py-2 bg-white/10 rounded-xl text-xs font-bold uppercase tracking-widest active:scale-95">Voltar</button>
+                  <div>
+                    <h2 className="text-4xl font-black text-[#D4AF37]">Mesa {checkoutTable}</h2>
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Resumo e Pagamento</p>
+                  </div>
+                  <button onClick={() => setCheckoutStep('select')} className="px-4 py-2 bg-white/10 rounded-xl text-xs font-bold uppercase tracking-widest active:scale-95 hover:bg-white/20 transition-colors">Voltar</button>
                 </div>
 
-                <div className="bg-[#14151A] border border-white/10 rounded-3xl p-6 relative overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,0.5)]">
-                  <div className="space-y-2 mb-6 border-b border-white/10 pb-6">
-                    <div className="flex justify-between text-gray-400 text-lg"><span>Subtotal</span><span>R$ 145,90</span></div>
+                <div className="bg-[#14151A] border border-[#D4AF37]/20 rounded-3xl p-6 relative overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,0.5)]">
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent opacity-50"></div>
+                  <div className="space-y-3 mb-6 border-b border-white/10 pb-6">
+                    <div className="flex justify-between text-gray-400 text-lg"><span>Consumo</span><span>R$ 145,90</span></div>
                     <div className="flex justify-between text-[#D4AF37] text-lg font-bold"><span>Serviço (10%)</span><span>R$ 14,59</span></div>
-                    <div className="flex justify-between text-white text-2xl font-black mt-4 pt-4 border-t border-white/5">
+                    <div className="flex justify-between text-white text-3xl font-black mt-4 pt-4 border-t border-white/5">
                       <span>Total</span><span>R$ 160,49</span>
                     </div>
                   </div>
 
-                  <h3 className="text-gray-400 text-xs font-bold tracking-widest uppercase mb-4">Método de Pagamento</h3>
+                  <h3 className="text-gray-400 text-xs font-bold tracking-widest uppercase mb-4 text-center">Selecionar Método</h3>
                   <div className="grid grid-cols-2 gap-3 mb-8">
                     {[
                       { id: 'credit', icon: <CreditCard className="w-5 h-5"/>, label: 'Crédito' },
@@ -191,12 +199,20 @@ export default function WaiterMobileView() {
                       <button 
                         key={method.id}
                         onClick={() => setPaymentMethod(method.id as any)}
-                        className={`flex items-center gap-3 p-4 rounded-2xl border-2 transition-all active:scale-95 ${paymentMethod === method.id ? 'bg-[#D4AF37]/10 border-[#D4AF37] text-[#D4AF37]' : 'bg-[#0B0C10] border-white/5 text-gray-400 hover:border-white/20'}`}
+                        className={`flex flex-col items-center justify-center gap-2 py-5 rounded-2xl border-2 transition-all active:scale-95 ${paymentMethod === method.id ? 'bg-[#D4AF37]/10 border-[#D4AF37] text-[#D4AF37] shadow-[0_0_15px_rgba(212,175,55,0.2)]' : 'bg-[#0B0C10] border-white/5 text-gray-400 hover:border-white/20'}`}
                       >
                         {method.icon}
-                        <span className="font-bold">{method.label}</span>
+                        <span className="font-bold text-sm uppercase tracking-widest">{method.label}</span>
                       </button>
                     ))}
+                    
+                    <button 
+                      onClick={() => setCheckoutStep('split')}
+                      className="col-span-2 flex items-center justify-center gap-3 p-4 rounded-2xl border-2 border-dashed border-white/20 text-white transition-all active:scale-95 hover:border-[#D4AF37]/50 hover:text-[#D4AF37]"
+                    >
+                      <UtensilsCrossed className="w-5 h-5" />
+                      <span className="font-bold text-sm uppercase tracking-widest">Dividir Conta (Split)</span>
+                    </button>
                   </div>
 
                   <button 
@@ -205,14 +221,51 @@ export default function WaiterMobileView() {
                       setIsProcessing(true);
                       setTimeout(() => { setIsProcessing(false); setCheckoutStep('success'); }, 1500);
                     }}
-                    className={`w-full font-black uppercase tracking-widest text-lg py-5 rounded-2xl transition-all active:scale-95 shadow-[0_0_20px_rgba(212,175,55,0.4)] flex items-center justify-center gap-2
-                      ${paymentMethod ? 'bg-[#D4AF37] hover:bg-[#c4a030] text-black' : 'bg-gray-800 text-gray-500 shadow-none'}`}
+                    className={`w-full font-black uppercase tracking-widest text-lg py-5 rounded-2xl transition-all active:scale-95 flex items-center justify-center gap-3
+                      ${paymentMethod ? 'bg-[#D4AF37] hover:bg-[#c4a030] text-black shadow-[0_0_20px_rgba(212,175,55,0.4)]' : 'bg-gray-800 text-gray-500 shadow-none'}`}
                   >
                     {isProcessing ? (
-                      <><span className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></span> Processando...</>
+                      <><span className="w-6 h-6 border-4 border-black border-t-transparent rounded-full animate-spin"></span> Fechando...</>
                     ) : (
-                      <><Wallet className="w-6 h-6" /> Confirmar Pagamento</>
+                      <><Wallet className="w-7 h-7" /> Pagar Conta</>
                     )}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {checkoutStep === 'split' && checkoutTable && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-3xl font-black text-white">Dividir Conta</h2>
+                  <button onClick={() => setCheckoutStep('payment')} className="px-4 py-2 bg-white/10 rounded-xl text-xs font-bold uppercase tracking-widest active:scale-95">Voltar</button>
+                </div>
+
+                <div className="bg-[#14151A] border border-white/10 rounded-3xl p-6 shadow-xl text-center space-y-8">
+                  <div>
+                    <p className="text-gray-400 font-bold uppercase tracking-widest text-xs mb-2">Total da Mesa {checkoutTable}</p>
+                    <p className="text-4xl font-black text-[#D4AF37]">R$ 160,49</p>
+                  </div>
+
+                  <div className="flex items-center justify-between bg-[#0B0C10] p-4 rounded-2xl border border-white/5">
+                    <button onClick={() => setSplitCount(Math.max(2, splitCount - 1))} className="w-12 h-12 flex items-center justify-center bg-white/10 rounded-xl active:scale-95"><Minus className="w-6 h-6" /></button>
+                    <div className="flex flex-col items-center">
+                      <span className="text-3xl font-black text-white">{splitCount}</span>
+                      <span className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Pessoas</span>
+                    </div>
+                    <button onClick={() => setSplitCount(splitCount + 1)} className="w-12 h-12 flex items-center justify-center bg-[#D4AF37] text-black rounded-xl active:scale-95"><Plus className="w-6 h-6" /></button>
+                  </div>
+
+                  <div>
+                    <p className="text-gray-400 font-bold uppercase tracking-widest text-xs mb-2">Valor por Pessoa</p>
+                    <p className="text-5xl font-black text-white">R$ {(160.49 / splitCount).toFixed(2)}</p>
+                  </div>
+
+                  <button 
+                    onClick={() => setCheckoutStep('success')}
+                    className="w-full bg-[#D4AF37] text-black font-black uppercase tracking-widest text-lg py-5 rounded-2xl shadow-[0_0_20px_rgba(212,175,55,0.4)] active:scale-95"
+                  >
+                    Confirmar Pagamento Dividido
                   </button>
                 </div>
               </div>

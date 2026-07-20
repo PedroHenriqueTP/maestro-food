@@ -18,7 +18,6 @@ export default function KitchenDashboard() {
   const pending = filteredOrders.filter(o => o.status === 'PENDING').sort((a,b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
   const preparing = filteredOrders.filter(o => o.status === 'PREPARING').sort((a,b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
   const ready = filteredOrders.filter(o => o.status === 'READY').sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  const ready = orders.filter(o => o.status === 'READY').sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   // Procura se tem algum alerta de Flash Sale do Intelligence
   const flashSaleAlert = insights.find(i => i.insightType === 'PRICE_DROP' || i.description.includes('Flash Sale'));
