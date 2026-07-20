@@ -1,15 +1,26 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useWaiterSocket } from '@/lib/hooks/useWaiterSocket';
+import { useTenantConfig } from '@/lib/contexts/TenantConfigContext';
 import { WaiterOrderCard } from '@/components/waiter/WaiterOrderCard';
 import { AnimatePresence, motion } from 'framer-motion';
 import { UtensilsCrossed, BellRing, Wallet, Search, Plus, Coffee, Beer, CreditCard, Banknote, QrCode, Printer, CheckCircle2 } from 'lucide-react';
 
 export default function WaiterMobileView() {
   const { orders, isConnected, claimOrder, completeOrder } = useWaiterSocket();
+  const { hasTableService, isLoading } = useTenantConfig();
+  const router = useRouter();
+  
   const [activeTab, setActiveTab] = useState<'mesas' | 'expedicao' | 'conta'>('mesas');
   const [selectedTable, setSelectedTable] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isLoading && !hasTableService) {
+      router.push('/dashboard');
+    }
+  }, [hasTableService, isLoading, router]);
 
   // Estados de Checkout
   const [checkoutStep, setCheckoutStep] = useState<'select' | 'payment' | 'split' | 'success'>('select');
@@ -23,6 +34,10 @@ export default function WaiterMobileView() {
 
   // Mocks
   const mesas = Array.from({ length: 12 }, (_, i) => ({ id: `M${i+1}`, status: i % 3 === 0 ? 'ocupada' : 'livre' }));
+
+  if (isLoading || !hasTableService) {
+    return <div className="min-h-screen bg-[#050505] flex items-center justify-center"><span className="w-10 h-10 border-4 border-[#D4AF37] border-t-transparent rounded-full animate-spin"></span></div>;
+  }
 
   return (
     <div className="min-h-screen bg-[#050505] text-white font-sans pb-28">

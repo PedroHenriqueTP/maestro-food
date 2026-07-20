@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTenantConfig } from "@/lib/contexts/TenantConfigContext";
 import { useRouter } from "next/navigation";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
@@ -15,6 +16,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   const [isOrbitalOpen, setIsOrbitalOpen] = useState(false);
   const [logs, setLogs] = useState<string[]>([]);
   const { user, logout } = useAuth();
+  const { hasKds, hasTableService, isLoading } = useTenantConfig();
   const router = useRouter();
 
   const handleLogout = () => {
@@ -97,22 +99,29 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             <SidebarGroup className="mt-8">
               <span className="px-4 text-[10px] font-black tracking-widest text-gray-500 uppercase mb-2 block">Operação Real-time</span>
               <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild className="hover:bg-[#D4AF37]/10 hover:text-[#D4AF37] text-gray-400 transition-colors group">
-                    <a href="/kitchen">
-                      <ChefHat className="w-4 h-4 group-hover:animate-bounce" />
-                      <span className="font-medium">KDS Cozinha</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild className="hover:bg-[#D4AF37]/10 hover:text-[#D4AF37] text-gray-400 transition-colors">
-                    <a href="/waiter">
-                      <MonitorSmartphone className="w-4 h-4" />
-                      <span className="font-medium">PDV Frente de Caixa</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+                
+                {hasKds && (
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild className="hover:bg-[#D4AF37]/10 hover:text-[#D4AF37] text-gray-400 transition-colors group">
+                      <a href="/kitchen">
+                        <ChefHat className="w-4 h-4 group-hover:animate-bounce" />
+                        <span className="font-medium">KDS Cozinha</span>
+                      </a>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )}
+
+                {hasTableService && (
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild className="hover:bg-[#D4AF37]/10 hover:text-[#D4AF37] text-gray-400 transition-colors">
+                      <a href="/waiter">
+                        <MonitorSmartphone className="w-4 h-4" />
+                        <span className="font-medium">PDV Mesas</span>
+                      </a>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )}
+
               </SidebarMenu>
             </SidebarGroup>
           </SidebarContent>

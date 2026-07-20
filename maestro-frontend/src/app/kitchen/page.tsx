@@ -1,7 +1,9 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useKitchenSocket } from '@/lib/hooks/useKitchenSocket';
+import { useTenantConfig } from '@/lib/contexts/TenantConfigContext';
 import { useIntelligence } from '@/lib/hooks/useIntelligence';
 import { OrderTicket } from '@/components/kitchen/OrderTicket';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -10,7 +12,15 @@ import { Clock, CheckCircle2, Flame, Utensils, AlertTriangle } from 'lucide-reac
 export default function KitchenDashboard() {
   const { orders, isConnected, updateOrderStatus } = useKitchenSocket();
   const { insights } = useIntelligence();
+  const { hasKds, isLoading } = useTenantConfig();
+  const router = useRouter();
   const [activeStation, setActiveStation] = React.useState('TODAS');
+
+  useEffect(() => {
+    if (!isLoading && !hasKds) {
+      router.push('/dashboard');
+    }
+  }, [hasKds, isLoading, router]);
 
   // Filtra as colunas por status e estação
   const filteredOrders = orders.filter(o => activeStation === 'TODAS' || o.station === activeStation || !o.station);
@@ -19,8 +29,11 @@ export default function KitchenDashboard() {
   const preparing = filteredOrders.filter(o => o.status === 'PREPARING').sort((a,b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
   const ready = filteredOrders.filter(o => o.status === 'READY').sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-  // Procura se tem algum alerta de Flash Sale do Intelligence
   const flashSaleAlert = insights.find(i => i.insightType === 'PRICE_DROP' || i.description.includes('Flash Sale'));
+
+  if (isLoading || !hasKds) {
+    return <div className="min-h-screen bg-[#000000] flex items-center justify-center"><span className="w-10 h-10 border-4 border-[#D4AF37] border-t-transparent rounded-full animate-spin"></span></div>;
+  }
 
   return (
     <div className="min-h-screen bg-[#000000] text-white p-6 font-sans">

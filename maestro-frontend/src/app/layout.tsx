@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { TenantConfigProvider } from "@/lib/contexts/TenantConfigContext";
 import { OrbitalMenu } from "@/components/ui/OrbitalMenu";
 import "./globals.css";
 
@@ -32,12 +33,14 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <AuthProvider>
-          <ThemeProvider>
-            {children}
-            <div className="fixed bottom-6 right-6 z-[9999]">
-              <OrbitalMenu />
-            </div>
-          </ThemeProvider>
+          <TenantConfigProvider>
+            <ThemeProvider>
+              {children}
+              <div className="fixed bottom-6 right-6 z-[9999]">
+                <OrbitalMenu />
+              </div>
+            </ThemeProvider>
+          </TenantConfigProvider>
         </AuthProvider>
       </body>
     </html>
