@@ -16,5 +16,3 @@ Centralizar a operação de FoodService no Brasil com orquestração inteligente
 3. Configure as envs (`.env.example` fornecido).
 4. Rode a infra: `docker-compose up -d` (Redis/Postgres).
 
-## 🧩 Protocolo de Contribuição
-Antes de abrir um PR, certifique-se de que a nota no Obsidian Vault correspondente está atualizada e linkada.
