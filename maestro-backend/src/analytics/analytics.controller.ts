@@ -4,7 +4,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Response } from 'express';
 
 @Controller('analytics')
-// @UseGuards(JwtAuthGuard) // Comentado para facilitar o dev do painel MVP sem auth header no axios do nextjs
+// @UseGuards(JwtAuthGuard)
 export class AnalyticsController {
   constructor(private readonly analyticsService: AnalyticsService) {}
 
@@ -12,5 +12,11 @@ export class AnalyticsController {
   async getDashboardData(@Res() res: Response) {
     const data = await this.analyticsService.getKpis();
     return res.status(HttpStatus.OK).json({ success: true, data });
+  }
+
+  @Get('crm')
+  async getCrmData(@Res() res: Response) {
+    const data = await this.analyticsService.getCrmCustomers();
+    return res.status(HttpStatus.OK).json({ success: true, customers: data });
   }
 }

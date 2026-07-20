@@ -8,22 +8,27 @@ import { motion, AnimatePresence } from "framer-motion";
 export default function CRMDashboard() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [executiveMode, setExecutiveMode] = useState(false);
+  const [activeRole, setActiveRole] = useState<'ADMIN_GLOBAL' | 'TENANT'>('TENANT');
 
-  // Mocks de clientes para o MVP
+  // Fetch Real CRM Data
   useEffect(() => {
     const fetchCRM = async () => {
       setIsLoading(true);
-      await new Promise((resolve) => setTimeout(resolve, 800));
-      
-      setCustomers([
-        { id: "c1", name: "Fábio Souza", phone: "(11) 98888-7777", totalOrders: 12, totalSpent: 45000, lastOrderDate: new Date().toISOString() },
-        { id: "c2", name: "Mariana Costa", phone: "(11) 97777-6666", totalOrders: 2, totalSpent: 12000, lastOrderDate: new Date(Date.now() - 86400000 * 5).toISOString() },
-        { id: "c3", name: "Carlos Eduardo", phone: "(11) 95555-4444", totalOrders: 6, totalSpent: 31000, lastOrderDate: new Date(Date.now() - 86400000 * 12).toISOString() },
-        { id: "c4", name: "Ana Beatriz", phone: "(11) 93333-2222", totalOrders: 1, totalSpent: 5500, lastOrderDate: new Date(Date.now() - 86400000 * 20).toISOString() },
-      ]);
-      
-      setIsLoading(false);
+      try {
+        // Fetch dados do DB Prisma via Backend NestJS
+        const res = await fetch('http://localhost:3001/analytics/crm');
+        if (res.ok) {
+          const json = await res.json();
+          setCustomers(json.customers || []);
+        } else {
+          setCustomers([]);
+        }
+      } catch (error) {
+        console.error("Erro ao buscar CRM do DB:", error);
+        setCustomers([]);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     fetchCRM();
@@ -63,23 +68,22 @@ export default function CRMDashboard() {
             </p>
           </div>
           
-          <div className="flex items-center gap-4">
-            {/* Toggle Executive Mode */}
-            <label className="flex items-center gap-3 cursor-pointer group">
-              <span className={`text-xs font-bold uppercase tracking-widest transition-colors ${executiveMode ? 'text-[#D4AF37]' : 'text-gray-500'}`}>
-                Modo Executivo
-              </span>
-              <div className="relative">
-                <input 
-                  type="checkbox" 
-                  className="sr-only" 
-                  checked={executiveMode}
-                  onChange={(e) => setExecutiveMode(e.target.checked)}
-                />
-                <div className={`block w-10 h-6 rounded-full transition-colors ${executiveMode ? 'bg-[#D4AF37]' : 'bg-gray-800'}`}></div>
-                <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${executiveMode ? 'transform translate-x-4' : ''}`}></div>
-              </div>
-            </label>
+          <div className="flex flex-col sm:flex-row items-center gap-6 bg-[#0a0a0a] border border-white/5 p-2 rounded-2xl">
+            {/* Tenant Switcher */}
+            <div className="flex bg-[#14151A] rounded-xl p-1 border border-white/5">
+              <button 
+                onClick={() => setActiveRole('ADMIN_GLOBAL')}
+                className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${activeRole === 'ADMIN_GLOBAL' ? 'bg-[#D4AF37] text-black shadow-[0_0_15px_rgba(212,175,55,0.3)]' : 'text-gray-500 hover:text-white'}`}
+              >
+                Admin Global
+              </button>
+              <button 
+                onClick={() => setActiveRole('TENANT')}
+                className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${activeRole === 'TENANT' ? 'bg-[#D4AF37] text-black shadow-[0_0_15px_rgba(212,175,55,0.3)]' : 'text-gray-500 hover:text-white'}`}
+              >
+                Tenant Workspace
+              </button>
+            </div>
 
             <button
               onClick={handleExport}
@@ -110,9 +114,9 @@ export default function CRMDashboard() {
           </div>
         </motion.div>
 
-        {/* Tabela CRM - AnimatePresence oculta a tabela se Modo Executivo estiver on */}
+        {/* Tabela CRM - Só renderiza se for Workspace do Tenant */}
         <AnimatePresence mode="wait">
-          {!executiveMode && (
+          {activeRole === 'TENANT' && (
             <motion.div 
               key="table"
               initial={{ opacity: 0, height: 0 }}
@@ -120,22 +124,34 @@ export default function CRMDashboard() {
               exit={{ opacity: 0, height: 0, overflow: 'hidden' }}
               transition={{ duration: 0.4, ease: "easeInOut" }}
             >
-              <CustomerTable customers={customers} isLoading={isLoading} />
+              {customers.length === 0 && !isLoading ? (
+                <div className="flex flex-col items-center justify-center p-12 bg-[#14151A] rounded-2xl border border-white/5 mt-8">
+                  <p className="text-gray-500 font-bold uppercase tracking-widest">Nenhum cliente real encontrado</p>
+                  <p className="text-sm text-gray-600 mt-2">O banco de dados Prisma está limpo/sem mockups.</p>
+                </div>
+              ) : (
+                <CustomerTable customers={customers} isLoading={isLoading} />
+              )}
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Se o modo executivo estiver On, mostraremos gráficos hypoteticos ou apenas os KPIs */}
+        {/* Visão de Super Admin (Múltiplos Tenants) */}
         <AnimatePresence mode="wait">
-          {executiveMode && (
+          {activeRole === 'ADMIN_GLOBAL' && (
              <motion.div 
-               key="executive-charts"
+               key="admin-view"
                initial={{ opacity: 0, y: 20 }}
                animate={{ opacity: 1, y: 0 }}
                exit={{ opacity: 0, y: -20 }}
-               className="h-64 flex items-center justify-center border border-dashed border-white/10 rounded-2xl bg-[#0a0a0a]/50 backdrop-blur-sm"
+               className="mt-8 flex flex-col gap-6"
              >
-               <p className="text-gray-500 font-mono text-sm">[ Espaço Reservado para o Chart de Retenção do Painel de Águia ]</p>
+               <div className="h-64 flex flex-col items-center justify-center border border-dashed border-[#D4AF37]/20 rounded-3xl bg-[#D4AF37]/5 backdrop-blur-sm shadow-[0_0_50px_rgba(212,175,55,0.05)]">
+                 <h2 className="text-[#D4AF37] font-black uppercase tracking-widest text-xl mb-2">Visão Panorâmica (Super Admin)</h2>
+                 <p className="text-gray-400 font-mono text-sm max-w-lg text-center leading-relaxed">
+                   Aqui o Maestro OS visualiza o Lifetime Value de todos os Tenants (Restaurantes) operando na plataforma SaaS.
+                 </p>
+               </div>
              </motion.div>
           )}
         </AnimatePresence>

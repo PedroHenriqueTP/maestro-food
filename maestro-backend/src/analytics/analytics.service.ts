@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
 
 export interface TimeSeriesData {
   month: string;
@@ -15,6 +16,8 @@ export interface FunnelData {
 @Injectable()
 export class AnalyticsService {
   private readonly logger = new Logger(AnalyticsService.name);
+
+  constructor(private readonly prisma: PrismaService) {}
 
   async getKpis() {
     this.logger.log('Calculando KPIs financeiros e de Growth...');
@@ -45,5 +48,37 @@ export class AnalyticsService {
       timeSeries,
       funnel,
     };
+  }
+
+  async getCrmCustomers() {
+    this.logger.log('Buscando base de clientes do CRM (Prisma)...');
+    try {
+      const customers = await this.prisma.customer.findMany({
+        include: { orders: true },
+        orderBy: { createdAt: 'desc' }
+      });
+
+      if (customers.length === 0) {
+        return []; // Retorna vazio em vez de mock se não houver dados, garantindo que "dados falsos" desapareçam
+      }
+
+      return customers.map(c => {
+        const totalOrders = c.orders.length;
+        const totalSpent = c.orders.reduce((acc, order) => acc + Number(order.totalAmount), 0) * 100; // converter para centavos
+        return {
+          id: c.id,
+          name: c.name,
+          phone: c.phone || 'Sem Telefone',
+          totalOrders,
+          totalSpent,
+          lastOrderDate: c.orders.length > 0 
+            ? c.orders.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0].createdAt.toISOString() 
+            : c.createdAt.toISOString()
+        };
+      });
+    } catch (error) {
+      this.logger.error('Erro ao buscar CRM Customers:', error);
+      return [];
+    }
   }
 }
