@@ -51,40 +51,43 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-background">
-        <Sidebar className="border-r border-border">
-          <SidebarHeader className="p-4 border-b border-border">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center font-bold text-primary-foreground">
+      <div className="flex min-h-screen w-full bg-[#050505]">
+        <Sidebar className="border-r border-white/5 bg-[#0B0C10]/95 backdrop-blur-xl">
+          <SidebarHeader className="p-6 border-b border-white/5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#D4AF37] to-amber-600 flex items-center justify-center font-black text-black shadow-[0_0_20px_rgba(212,175,55,0.3)]">
                 M
               </div>
-              <span className="font-semibold text-lg premium-text">Maestro</span>
+              <div className="flex flex-col">
+                <span className="font-bold text-lg text-white tracking-wide">Maestro</span>
+                <span className="text-[10px] text-[#D4AF37] uppercase tracking-widest font-bold">Food Service OS</span>
+              </div>
             </div>
           </SidebarHeader>
           <SidebarContent>
             <SidebarGroup>
               <SidebarMenu>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild className="hover:bg-white/5 data-[active=true]:bg-[#D4AF37]/10 data-[active=true]:text-[#D4AF37] text-gray-400 transition-colors">
                     <a href="/admin/analytics">
                       <LayoutDashboard className="w-4 h-4" />
-                      <span>Analytics</span>
+                      <span className="font-medium">Analytics & KPIs</span>
                     </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild className="hover:bg-white/5 text-gray-400 transition-colors">
                     <a href="/admin/growth">
                       <Flame className="w-4 h-4" />
-                      <span>Growth Engine</span>
+                      <span className="font-medium">Growth Engine</span>
                     </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
-                    <a href="#">
+                  <SidebarMenuButton asChild className="hover:bg-white/5 text-gray-400 transition-colors">
+                    <a href="/admin/crm">
                       <Users className="w-4 h-4" />
-                      <span>CRM</span>
+                      <span className="font-medium">CRM Intelligence</span>
                     </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -93,40 +96,46 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           </SidebarContent>
         </Sidebar>
 
-        <main className="flex-1 flex flex-col h-screen overflow-hidden">
-          <header className="h-16 border-b border-border flex items-center px-4 justify-between bg-card shrink-0">
-            <div className="flex items-center gap-4">
-              <SidebarTrigger />
-              <h2 className="text-sm font-medium text-muted-foreground">Admin Workspace</h2>
+        <main className="flex-1 flex flex-col h-screen overflow-hidden bg-gradient-to-br from-[#050505] to-[#0a0a0c]">
+          <header className="h-20 border-b border-white/5 flex items-center px-8 justify-between bg-[#0B0C10]/80 backdrop-blur-md shrink-0 sticky top-0 z-40">
+            <div className="flex items-center gap-6">
+              <SidebarTrigger className="text-gray-400 hover:text-white transition-colors" />
+              <div className="h-6 w-px bg-white/10 hidden md:block"></div>
+              <h2 className="text-sm font-semibold text-gray-300 tracking-wider uppercase hidden md:block">Workspace Executivo</h2>
             </div>
-            <div className="flex items-center gap-4">
-              <Button variant="outline" size="sm" className="border-primary/20 text-primary">
-                {user ? user.tenantId : 'Carregando...'}
-              </Button>
+            <div className="flex items-center gap-6">
+              <div className="px-4 py-1.5 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/20 flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-[#D4AF37] animate-pulse"></div>
+                <span className="text-xs font-bold text-[#D4AF37] tracking-widest uppercase">
+                  {user ? user.tenantId : 'Conectando...'}
+                </span>
+              </div>
+              
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                    <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">
+                  <Button variant="ghost" className="relative h-10 w-10 rounded-xl hover:bg-white/5 p-0 overflow-hidden border border-white/10 transition-all hover:border-white/20">
+                    <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center font-bold text-gray-300 text-lg">
                       {user ? user.name.charAt(0) : 'U'}
                     </div>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 bg-card border-border">
-                  <div className="flex items-center justify-start gap-2 p-2">
-                    <div className="flex flex-col space-y-1 leading-none">
-                      <p className="font-medium">{user ? user.name : 'Usuário'}</p>
-                      <p className="text-xs text-muted-foreground">{user ? user.email : ''}</p>
-                    </div>
+                <DropdownMenuContent align="end" className="w-64 bg-[#14151A] border-white/10 p-2 shadow-2xl">
+                  <div className="flex flex-col space-y-1 p-3 border-b border-white/5 mb-2 bg-[#0B0C10] rounded-lg">
+                    <p className="font-bold text-white">{user ? user.name : 'Usuário'}</p>
+                    <p className="text-xs text-gray-500 font-mono">{user ? user.email : ''}</p>
                   </div>
-                  <DropdownMenuItem onClick={handleLogout} className="text-destructive cursor-pointer">
-                    Sair
+                  <DropdownMenuItem className="text-gray-300 hover:text-white hover:bg-white/5 cursor-pointer rounded-md">
+                    Configurações
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleLogout} className="text-red-400 hover:text-red-300 hover:bg-red-500/10 cursor-pointer rounded-md mt-1">
+                    Encerrar Sessão
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
           </header>
           
-          <div className="flex-1 overflow-auto relative">
+          <div className="flex-1 overflow-auto relative p-6 md:p-8 custom-scrollbar">
             {children}
 
             {/* ORBITAL COMMAND RELAY */}
