@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, Variants } from "framer-motion";
+import { formatCurrency, formatDate } from "../../../lib/utils/formatters";
 
 export interface Customer {
   id: string;
@@ -27,9 +28,13 @@ const containerVariants = {
 };
 
 // Item variants
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+  show: { 
+    opacity: 1, 
+    y: 0,
+    transition: { type: "spring" as const, stiffness: 300, damping: 24 }
+  }
 };
 
 export function CustomerTable({ customers, isLoading }: CustomerTableProps) {

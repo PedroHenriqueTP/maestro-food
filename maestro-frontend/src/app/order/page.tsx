@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Card } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 const MENU_ITEMS = [
   { id: '1', name: 'Wagyu Burger', price: 89.90, desc: 'Pão brioche, 200g Wagyu, Queijo Trufado' },

@@ -2,8 +2,8 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Card } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 export interface ProductCardProps {
   id: string;
@@ -15,7 +15,7 @@ export interface ProductCardProps {
   onAdd?: (id: string) => void;
 }
 
-export function ProductCard({ id, name, price, imageUrl, description, badges = [], onAdd }: ProductCardProps) {
+export const ProductCard = React.memo(function ProductCard({ id, name, price, imageUrl, description, badges = [], onAdd }: ProductCardProps) {
   return (
     <motion.div
       whileHover={{ y: -5 }}
@@ -65,4 +65,4 @@ export function ProductCard({ id, name, price, imageUrl, description, badges = [
       </Card>
     </motion.div>
   );
-}
+});

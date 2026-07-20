@@ -1,0 +1,11 @@
+{
+  "system_identity": "Maestro Food Service - Plataforma Enterprise SaaS",
+  "target_audience": "Gestores de Restaurantes High-End, Operadores de Cozinha de Alta Performance",
+  "business_promises": [
+    "1. Dashboard Executivo: A tela inicial deve possuir métricas vitais como MRR (Receita Recorrente), Churn e Custo de Aquisição (CAC) sempre visíveis e fáceis de ler.",
+    "2. Estética Luxuosa (Black Gold): O sistema não pode parecer um software de gestão amador dos anos 90. Deve usar fontes refinadas, modo escuro profundo com detalhes em dourado e micro-interações responsivas.",
+    "3. Zero Atrito Operacional: Um garçom ou operador de caixa deve conseguir achar a funcionalidade desejada sem pensar. A tipografia deve indicar a hierarquia de forma óbvia.",
+    "4. Sistema Multitenant Robusto: Todo acesso deve dar sensação de pertencimento à marca do cliente. Se a interface parecer genérica demais, há quebra da promessa de White-label VIP.",
+    "5. Kitchen Display System (KDS): A visão da cozinha precisa ter alto contraste. Ordens urgentes ou atrasadas devem saltar aos olhos imediatamente, sem requerer leitura atenta de textos miúdos."
+  ]
+}

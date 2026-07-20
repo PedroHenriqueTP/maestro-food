@@ -24,7 +24,7 @@ export interface KitchenOrder {
 })
 export class KitchenGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
-  server: Server;
+  server!: Server;
 
   private readonly logger = new Logger(KitchenGateway.name);
 
@@ -47,9 +47,17 @@ export class KitchenGateway implements OnGatewayConnection, OnGatewayDisconnect 
   ];
 
   handleConnection(client: Socket) {
-    this.logger.log(`KDS Conectado: ${client.id}`);
-    // Envia estado inicial ao conectar
-    client.emit('sync_orders', this.activeOrders);
+    // Para simplificar no MVP e isolar o socket, vamos extrair o tenantId dos headers ou auth query
+    // Em produção seria algo como: const token = client.handshake.auth.token; validar token -> obter tenantId
+    const tenantId = client.handshake.query.tenantId as string || 'default_tenant';
+    
+    this.logger.log(`KDS Conectado: ${client.id} | Tenant: ${tenantId}`);
+    
+    // Insere o client numa sala exclusiva do Tenant
+    client.join(tenantId);
+    
+    // (Opcional) Envia estado inicial filtrado pelo tenantId, se houvesse um banco
+    client.emit('sync_orders', this.activeOrders); // Simulando
   }
 
   handleDisconnect(client: Socket) {
@@ -58,14 +66,15 @@ export class KitchenGateway implements OnGatewayConnection, OnGatewayDisconnect 
 
   @SubscribeMessage('update_status')
   handleUpdateStatus(client: Socket, payload: { id: string; status: 'PREPARING' | 'READY' | 'DELIVERING' | 'COMPLETED' }) {
-    this.logger.log(`Update Order ${payload.id} -> ${payload.status}`);
+    const tenantId = client.handshake.query.tenantId as string || 'default_tenant';
+    this.logger.log(`Update Order ${payload.id} -> ${payload.status} (Tenant: ${tenantId})`);
     
     this.activeOrders = this.activeOrders.map((order) =>
       order.id === payload.id ? { ...order, status: payload.status } : order
     );
 
-    // Broadcast para todos os tablets KDS e Mobiles dos Garçons conectados
-    this.server.emit('sync_orders', this.activeOrders);
+    // Broadcast restrito apenas para o tenant específico
+    this.server.to(tenantId).emit('sync_orders', this.activeOrders);
   }
 
   @SubscribeMessage('claim_order')
@@ -83,9 +92,9 @@ export class KitchenGateway implements OnGatewayConnection, OnGatewayDisconnect 
   }
 
   // Método para simular a chegada de um novo pedido externo (Supabase/Webhook)
-  simulateIncomingOrder(order: KitchenOrder) {
+  simulateIncomingOrder(tenantId: string, order: KitchenOrder) {
     this.activeOrders.push(order);
-    this.server.emit('new_order', order);
-    this.server.emit('sync_orders', this.activeOrders);
+    this.server.to(tenantId).emit('new_order', order);
+    this.server.to(tenantId).emit('sync_orders', this.activeOrders);
   }
 }

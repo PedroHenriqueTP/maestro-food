@@ -36,7 +36,7 @@ export class BillingService {
     this.logger.log(`Provisionamento de [${email}] concluído com sucesso. MRR Adicionado: ${(mrr / 100).toFixed(2)} BRL`);
     
     // Dispara o WhatsApp de Boas Vindas
-    const fakeTenantId = email.split('@')[0];
+    const fakeTenantId = email.split('@')[0] || 'tenant';
     await this.whatsappService.sendOnboardingMessage(email, fakeTenantId);
   }
 }

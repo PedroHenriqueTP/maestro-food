@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Card } from '@/components/ui/Card';
+import { Card } from '@/components/ui/card';
 import { KitchenOrder } from '@/lib/hooks/useKitchenSocket';
 
 interface WaiterOrderCardProps {

@@ -1,0 +1,65 @@
+name: Maestro Production Flow (CI/CD)
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test-and-lint:
+    name: Backend QA (E2E Tests)
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies (Backend)
+        run: |
+          cd maestro-backend
+          npm install
+
+      - name: Run E2E Integration Tests
+        run: |
+          cd maestro-backend
+          npm run test:e2e
+          
+  deploy-frontend:
+    name: Deploy Frontend (Vercel Placeholder)
+    runs-on: ubuntu-latest
+    needs: test-and-lint
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Placeholder para Vercel CLI Deploy
+        run: |
+          echo "Deploying to Vercel... (Aguardando VERCEL_TOKEN e VERCEL_PROJECT_ID no GitHub Secrets)"
+          # npx vercel --prod --token ${{ secrets.VERCEL_TOKEN }}
+
+  deploy-backend:
+    name: Build & Push Backend Docker Image
+    runs-on: ubuntu-latest
+    needs: test-and-lint
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        
+      - name: Placeholder para Render / Fly.io Deploy
+        run: |
+          echo "Building Docker Image for Maestro Backend..."
+          # docker build -t maestro-backend ./maestro-backend
+          # docker push maestro-backend:latest
+          echo "Triggering Server Restart via Webhook (Aguardando Configuração do Provedor de Cloud)"

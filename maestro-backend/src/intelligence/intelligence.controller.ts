@@ -1,8 +1,10 @@
-import { Controller, Get, Post, Body, HttpCode, HttpStatus, Logger, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Body, HttpCode, HttpStatus, Logger, BadRequestException, UseGuards } from '@nestjs/common';
 import { IntelligenceService } from './intelligence.service';
 import { N8nService } from '../n8n/n8n.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('intelligence')
+@UseGuards(JwtAuthGuard)
 export class IntelligenceController {
   private readonly logger = new Logger(IntelligenceController.name);
 

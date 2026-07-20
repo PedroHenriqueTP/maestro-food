@@ -1,26 +1,31 @@
 import { Module } from '@nestjs/common';
-import { BillingController } from './billing/billing.controller';
-import { BillingService } from './billing/billing.service';
-import { N8nService } from './n8n/n8n.service';
-import { WhatsappService } from './notifications/whatsapp.service';
-import { PrismaService } from './prisma/prisma.service';
-import { IntelligenceController } from './intelligence/intelligence.controller';
-import { IntelligenceService } from './intelligence/intelligence.service';
+import { PrismaModule } from './prisma/prisma.module';
+import { N8nModule } from './n8n/n8n.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { BillingModule } from './billing/billing.module';
+import { LedgerModule } from './ledger/ledger.module';
+import { PredictiveModule } from './ai/predictive.module';
+import { IntelligenceModule } from './intelligence/intelligence.module';
+import { GrowthModule } from './growth/growth.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 import { KitchenGateway } from './kitchen/kitchen.gateway';
+import { KitchenModule } from './kitchen/kitchen.module';
+import { TenantsModule } from './tenants/tenants.module';
 
 @Module({
-  imports: [],
-  controllers: [
-    BillingController,
-    IntelligenceController,
+  imports: [
+    PrismaModule,
+    N8nModule,
+    NotificationsModule,
+    BillingModule,
+    LedgerModule,
+    PredictiveModule,
+    IntelligenceModule,
+    GrowthModule,
+    AnalyticsModule,
+    KitchenModule,
+    TenantsModule
   ],
-  providers: [
-    BillingService,
-    N8nService,
-    WhatsappService,
-    PrismaService,
-    IntelligenceService,
-    KitchenGateway,
-  ],
+  providers: [KitchenGateway]
 })
 export class AppModule {}

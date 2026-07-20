@@ -3,8 +3,8 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useIntelligence } from '@/lib/hooks/useIntelligence';
-import { Card } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 export default function MaestroIntelligenceHQ() {
   const { diffs, insights, loading, error } = useIntelligence();

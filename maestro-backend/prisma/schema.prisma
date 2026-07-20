@@ -8,35 +8,41 @@ datasource db {
 }
 
 model Tenant {
-  id        String   @id @default(uuid())
+  id        String  @id @default(uuid())
   name      String
-  document  String?  @unique
-  subdomain String   @unique
-  isActive  Boolean  @default(true)
-  
-  users           User[]
-  categories      Category[]
-  products        Product[]
-  modifierGroups  ModifierGroup[]
-  orders          Order[]
-  customers       Customer[]
-  auditLogs       AuditLog[]
+  document  String? @unique
+  subdomain String  @unique
+  isActive  Boolean @default(true)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  users          User[]
+  categories     Category[]
+  products       Product[]
+  modifierGroups ModifierGroup[]
+  orders         Order[]
+  customers      Customer[]
+  auditLogs      AuditLog[]
+
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  Account           Account[]
+  LedgerTransaction LedgerTransaction[]
+  TenantUI          TenantUI?
+  PredictiveInsight PredictiveInsight[]
+  Supplier          Supplier[]
+  MarketingBudget   MarketingBudget[]
 
   @@map("tenants")
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  name      String
-  role      Role     @default(OPERATOR)
-  
-  tenantId  String?
-  tenant    Tenant?  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id       String @id @default(uuid())
+  email    String @unique
+  password String
+  name     String
+  role     Role   @default(OPERATOR)
+
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   auditLogs AuditLog[]
 
@@ -55,17 +61,17 @@ enum Role {
 }
 
 model AuditLog {
-  id        String   @id @default(uuid())
-  action    String   
-  entity    String   
-  entityId  String
-  details   Json?    
-  
-  userId    String?
-  user      User?    @relation(fields: [userId], references: [id])
-  
-  tenantId  String
-  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id       String @id @default(uuid())
+  action   String
+  entity   String
+  entityId String
+  details  Json?
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 
@@ -75,42 +81,42 @@ model AuditLog {
 }
 
 model Category {
-  id          String   @id @default(uuid())
+  id          String  @id @default(uuid())
   name        String
   description String?
-  sortOrder   Int      @default(0)
-  
-  tenantId    String
-  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  
-  products    Product[]
+  sortOrder   Int     @default(0)
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  products Product[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([tenantId])
   @@map("categories")
 }
 
 model Product {
-  id          String   @id @default(uuid())
+  id          String  @id @default(uuid())
   name        String
   description String?
-  price       Decimal  @db.Decimal(10, 2)
+  price       Decimal @db.Decimal(10, 2)
   sku         String?
-  isActive    Boolean  @default(true)
-  
-  categoryId  String?
-  category    Category? @relation(fields: [categoryId], references: [id])
-  
-  tenantId    String
-  tenant      Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  isActive    Boolean @default(true)
+
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id])
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   modifierGroups ProductModifierGroup[]
   orderItems     OrderItem[]
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([tenantId])
   @@index([categoryId])
@@ -118,16 +124,16 @@ model Product {
 }
 
 model ModifierGroup {
-  id          String   @id @default(uuid())
-  name        String   
-  minRequired Int      @default(0)
-  maxAllowed  Int      @default(1)
-  
-  tenantId    String
-  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  
-  modifiers   Modifier[]
-  products    ProductModifierGroup[]
+  id          String @id @default(uuid())
+  name        String
+  minRequired Int    @default(0)
+  maxAllowed  Int    @default(1)
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  modifiers Modifier[]
+  products  ProductModifierGroup[]
 
   @@index([tenantId])
   @@map("modifier_groups")
@@ -136,36 +142,36 @@ model ModifierGroup {
 model ProductModifierGroup {
   productId       String
   modifierGroupId String
-  
-  product         Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
-  modifierGroup   ModifierGroup @relation(fields: [modifierGroupId], references: [id], onDelete: Cascade)
+
+  product       Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  modifierGroup ModifierGroup @relation(fields: [modifierGroupId], references: [id], onDelete: Cascade)
 
   @@id([productId, modifierGroupId])
   @@map("product_modifier_groups")
 }
 
 model Modifier {
-  id              String   @id @default(uuid())
-  name            String
-  price           Decimal  @default(0.00) @db.Decimal(10, 2)
-  
+  id    String  @id @default(uuid())
+  name  String
+  price Decimal @default(0.00) @db.Decimal(10, 2)
+
   modifierGroupId String
   modifierGroup   ModifierGroup @relation(fields: [modifierGroupId], references: [id], onDelete: Cascade)
 
-  orderItemMods   OrderItemModifier[]
+  orderItemMods OrderItemModifier[]
 
   @@index([modifierGroupId])
   @@map("modifiers")
 }
 
 model Customer {
-  id        String   @id @default(uuid())
-  name      String
-  phone     String?
-  
-  tenantId  String
-  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  orders    Order[]
+  id    String  @id @default(uuid())
+  name  String
+  phone String?
+
+  tenantId String
+  tenant   Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  orders   Order[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -176,23 +182,23 @@ model Customer {
 
 model Order {
   id          String      @id @default(uuid())
-  orderNumber String      
+  orderNumber String
   status      OrderStatus @default(NEW)
-  channel     Channel     
+  channel     Channel
   totalAmount Decimal     @db.Decimal(10, 2)
-  
-  metadata    Json?       
 
-  tenantId    String
-  tenant      Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  
-  customerId  String?
-  customer    Customer?   @relation(fields: [customerId], references: [id])
+  metadata Json?
 
-  items       OrderItem[]
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id])
+
+  items OrderItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([tenantId])
   @@index([createdAt])
@@ -203,11 +209,11 @@ model OrderItem {
   id        String  @id @default(uuid())
   quantity  Int
   unitPrice Decimal @db.Decimal(10, 2)
-  notes     String? 
-  
-  orderId   String
-  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  
+  notes     String?
+
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
   productId String
   product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
 
@@ -217,15 +223,15 @@ model OrderItem {
 }
 
 model OrderItemModifier {
-  id          String  @id @default(uuid())
-  quantity    Int     @default(1)
-  unitPrice   Decimal @db.Decimal(10, 2)
-  
+  id        String  @id @default(uuid())
+  quantity  Int     @default(1)
+  unitPrice Decimal @db.Decimal(10, 2)
+
   orderItemId String
   orderItem   OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
-  
-  modifierId  String
-  modifier    Modifier  @relation(fields: [modifierId], references: [id], onDelete: Restrict)
+
+  modifierId String
+  modifier   Modifier @relation(fields: [modifierId], references: [id], onDelete: Restrict)
 
   @@map("order_item_modifiers")
 }
@@ -252,11 +258,15 @@ enum Channel {
 
 // Financial Ledger (Double-Entry)
 model Account {
-  id        String        @id @default(uuid())
-  tenantId  String
-  name      String
-  type      AccountType
-  entries   LedgerEntry[]
+  id       String        @id @default(uuid())
+  tenantId String
+  tenant   Tenant        @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  name     String
+  type     AccountType
+  entries  LedgerEntry[]
+
+  @@index([tenantId])
+  @@map("accounts")
 }
 
 enum AccountType {
@@ -270,22 +280,30 @@ enum AccountType {
 model LedgerTransaction {
   id          String        @id @default(uuid())
   tenantId    String
+  tenant      Tenant        @relation(fields: [tenantId], references: [id], onDelete: Restrict)
   description String
   date        DateTime
   status      String        @default("POSTED") // PENDING, POSTED, REVERSED
   metadata    Json?
   entries     LedgerEntry[]
   createdAt   DateTime      @default(now())
+
+  @@index([tenantId])
+  @@map("ledger_transactions")
 }
 
 model LedgerEntry {
-  id            String             @id @default(uuid())
+  id            String            @id @default(uuid())
   transactionId String
-  transaction   LedgerTransaction  @relation(fields: [transactionId], references: [id])
+  transaction   LedgerTransaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
   accountId     String
-  account       Account            @relation(fields: [accountId], references: [id])
+  account       Account           @relation(fields: [accountId], references: [id], onDelete: Restrict)
   type          EntryType
-  amount        Int                // Armazenado em centavos
+  amount        Int // Armazenado em centavos
+
+  @@index([transactionId])
+  @@index([accountId])
+  @@map("ledger_entries")
 }
 
 enum EntryType {
@@ -295,23 +313,27 @@ enum EntryType {
 
 // Theming Engine
 model TenantUI {
-  id          String   @id @default(uuid())
-  tenantId    String   @unique
-  themeMode   String   @default("system")
-  colors      Json?
-  typography  Json?
-  logoUrl     String?
-  createdAt   DateTime @default(now())
+  id         String   @id @default(uuid())
+  tenantId   String   @unique
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  themeMode  String   @default("system")
+  colors     Json?
+  typography Json?
+  logoUrl    String?
+  createdAt  DateTime @default(now())
+
+  @@map("tenant_ui")
 }
 
 // Predictive AI Insights
 model PredictiveInsight {
   id          String   @id @default(uuid())
   tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   title       String
   description String
-  actionType  String   // ex: PRICE_ADJUSTMENT, PROMOTION
-  severity    String   // LOW, MEDIUM, HIGH, CRITICAL
+  actionType  String // ex: PRICE_ADJUSTMENT, PROMOTION
+  severity    String // LOW, MEDIUM, HIGH, CRITICAL
   status      String   @default("PENDING") // PENDING, ACCEPTED, DISMISSED
   metadata    Json?
   createdAt   DateTime @default(now())
@@ -326,35 +348,37 @@ model PredictiveInsight {
 // ==========================================
 
 model Supplier {
-  id          String   @id @default(uuid())
-  tenantId    String
-  name        String
-  category    String   // ex: Fachadas, Embalagens, Freelancers
-  contact     String?
-  rating      Int      @default(5)
-  
-  budgets     MarketingBudget[]
+  id       String  @id @default(uuid())
+  tenantId String
+  tenant   Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name     String
+  category String // ex: Fachadas, Embalagens, Freelancers
+  contact  String?
+  rating   Int     @default(5)
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  budgets MarketingBudget[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([tenantId])
   @@map("suppliers")
 }
 
 model MarketingBudget {
-  id          String   @id @default(uuid())
+  id          String       @id @default(uuid())
   tenantId    String
+  tenant      Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   description String
-  amount      Decimal  @db.Decimal(10, 2)
+  amount      Decimal      @db.Decimal(10, 2)
   status      BudgetStatus @default(PENDING)
-  roiEstimate Decimal? @db.Decimal(10, 2)
-  
-  supplierId  String?
-  supplier    Supplier? @relation(fields: [supplierId], references: [id])
+  roiEstimate Decimal?     @db.Decimal(10, 2)
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  supplierId String?
+  supplier   Supplier? @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([tenantId])
   @@index([supplierId])
@@ -367,4 +391,3 @@ enum BudgetStatus {
   REJECTED
   EXECUTED
 }
-
