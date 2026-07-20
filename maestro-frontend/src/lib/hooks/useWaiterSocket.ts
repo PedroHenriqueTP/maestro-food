@@ -3,10 +3,14 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../supabase';
 import { KitchenOrder } from './useKitchenSocket';
+import { useAuth } from '@/contexts/AuthContext';
 
-export function useWaiterSocket(tenantId: string) {
+export function useWaiterSocket() {
   const [orders, setOrders] = useState<KitchenOrder[]>([]);
   const [isConnected, setIsConnected] = useState(false);
+  const { user } = useAuth();
+  
+  const tenantId = user?.tenantId || 'TENANT_MOCK_1';
 
   useEffect(() => {
     if (!tenantId) return;
@@ -41,7 +45,7 @@ export function useWaiterSocket(tenantId: string) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [tenantId]);
 
   const claimOrder = async (id: string) => {
     // Optimistic UI

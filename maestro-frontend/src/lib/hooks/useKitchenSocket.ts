@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '../supabase';
+import { useAuth } from '@/contexts/AuthContext';
 
 export interface KitchenOrder {
   id: string;
@@ -14,6 +15,9 @@ export interface KitchenOrder {
 export function useKitchenSocket() {
   const [orders, setOrders] = useState<KitchenOrder[]>([]);
   const [isConnected, setIsConnected] = useState(false);
+  const { user } = useAuth();
+  
+  const tenantId = user?.tenantId || 'TENANT_MOCK_1';
 
   useEffect(() => {
     // 1. Fetch initial state
@@ -70,7 +74,7 @@ export function useKitchenSocket() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [tenantId]);
 
   const updateOrderStatus = async (id: string, status: 'PREPARING' | 'READY') => {
     // Optimistic UI Update
