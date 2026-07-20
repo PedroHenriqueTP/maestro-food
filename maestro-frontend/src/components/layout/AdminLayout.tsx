@@ -6,7 +6,7 @@ import { LayoutDashboard, Users, Flame, Settings, Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { useAuthStore } from "../../stores/useAuthStore";
+import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
@@ -14,7 +14,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   const [command, setCommand] = useState("");
   const [isOrbitalOpen, setIsOrbitalOpen] = useState(false);
   const [logs, setLogs] = useState<string[]>([]);
-  const { user, logout } = useAuthStore();
+  const { user, logout } = useAuth();
   const router = useRouter();
 
   const handleLogout = () => {

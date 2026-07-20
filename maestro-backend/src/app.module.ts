@@ -8,7 +8,7 @@ import { PredictiveModule } from './ai/predictive.module';
 import { IntelligenceModule } from './intelligence/intelligence.module';
 import { GrowthModule } from './growth/growth.module';
 import { AnalyticsModule } from './analytics/analytics.module';
-import { KitchenGateway } from './kitchen/kitchen.gateway';
+
 import { KitchenModule } from './kitchen/kitchen.module';
 import { TenantsModule } from './tenants/tenants.module';
 
@@ -25,7 +25,6 @@ import { TenantsModule } from './tenants/tenants.module';
     AnalyticsModule,
     KitchenModule,
     TenantsModule
-  ],
-  providers: [KitchenGateway]
+  ]
 })
 export class AppModule {}

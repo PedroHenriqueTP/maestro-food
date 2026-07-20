@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 import { OrbitalMenu } from "@/components/ui/OrbitalMenu";
 import "./globals.css";
 
@@ -30,10 +31,14 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <ThemeProvider>
-          {children}
-          <OrbitalMenu />
-        </ThemeProvider>
+        <AuthProvider>
+          <ThemeProvider>
+            {children}
+            <div className="fixed bottom-6 right-6 z-[9999]">
+              <OrbitalMenu />
+            </div>
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   );

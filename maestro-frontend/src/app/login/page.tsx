@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuthStore } from '../../stores/useAuthStore';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 
 export default function LoginPage() {
@@ -11,7 +11,7 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const loginStore = useAuthStore((state) => state.login);
+  const { login } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,11 +31,7 @@ export default function LoginPage() {
         throw new Error(data.message || 'Erro ao realizar login');
       }
 
-      // Salva cookie manualmente para o middleware interceptar
-      // Em prod, seria HttpOnly setado pelo backend
-      document.cookie = `maestro_token=${data.accessToken}; path=/; max-age=86400`;
-      
-      loginStore(data.user);
+      login(data.accessToken, data.user);
       router.push('/admin/analytics');
     } catch (err: any) {
       setError(err.message);

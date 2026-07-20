@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import { formatCurrency, formatDate } from "../../../lib/utils/formatters";
+import { useAuth } from "@/contexts/AuthContext";
 
 export interface Customer {
   id: string;
@@ -39,6 +40,8 @@ const itemVariants: Variants = {
 
 export function CustomerTable({ customers, isLoading }: CustomerTableProps) {
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
+  const { user } = useAuth();
+  const isAdminOrManager = user?.role === 'ADMIN' || user?.role === 'MANAGER';
 
   const isVip = (customer: Customer) => {
     return customer.totalOrders >= 5 || customer.totalSpent >= 30000;
@@ -150,14 +153,18 @@ export function CustomerTable({ customers, isLoading }: CustomerTableProps) {
                           </div>
                           <div>
                             <span className="text-xs text-gray-500 uppercase tracking-widest font-bold">Ações Inteligentes</span>
-                            <div className="flex gap-3 mt-2">
-                              <button className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg text-sm transition-colors border border-white/10">
-                                Emitir Cupom Especial
-                              </button>
-                              <button className="px-4 py-2 bg-[#D4AF37]/10 hover:bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30 rounded-lg text-sm transition-colors shadow-[0_0_10px_rgba(212,175,55,0.1)]">
-                                WhatsApp Direto
-                              </button>
-                            </div>
+                            {isAdminOrManager ? (
+                              <div className="flex gap-3 mt-2">
+                                <button className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg text-sm transition-colors border border-white/10">
+                                  Emitir Cupom Especial
+                                </button>
+                                <button className="px-4 py-2 bg-[#D4AF37]/10 hover:bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30 rounded-lg text-sm transition-colors shadow-[0_0_10px_rgba(212,175,55,0.1)]">
+                                  WhatsApp Direto
+                                </button>
+                              </div>
+                            ) : (
+                              <p className="text-sm text-gray-600 mt-2 italic">Você não tem permissão para realizar ações.</p>
+                            )}
                           </div>
                           <div className="flex items-center justify-end">
                             {vip && (
