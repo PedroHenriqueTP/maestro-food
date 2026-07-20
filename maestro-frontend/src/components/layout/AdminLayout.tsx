@@ -166,52 +166,59 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           <div className="flex-1 overflow-auto relative p-6 md:p-8 custom-scrollbar">
             {children}
 
-            {/* ORBITAL COMMAND RELAY */}
-            <Dialog open={isOrbitalOpen} onOpenChange={setIsOrbitalOpen}>
-              <DialogTrigger asChild>
-                <Button 
-                  size="icon" 
-                  className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-[0_0_30px_rgba(212,175,55,0.4)] bg-[#D4AF37] hover:bg-[#c4a030] text-black border-2 border-[#1A1C23] animate-pulse z-50 transition-all hover:scale-105"
-                >
-                  <Bot className="w-6 h-6" />
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-md bg-[#0B0C10]/95 backdrop-blur-2xl border border-white/10 shadow-2xl">
-                <DialogHeader>
-                  <DialogTitle className="flex items-center gap-2 text-[#D4AF37] font-black tracking-widest uppercase">
-                    <Bot className="w-5 h-5" />
-                    Maestro Relay
-                  </DialogTitle>
-                </DialogHeader>
-                <div className="flex flex-col gap-4 mt-2">
-                  <div className="h-48 bg-[#050505] border border-white/5 rounded-xl p-4 overflow-y-auto font-mono text-xs flex flex-col gap-2 custom-scrollbar">
-                    {logs.length === 0 ? (
-                      <span className="text-gray-600 flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 bg-[#D4AF37] rounded-full animate-pulse"></span>
-                        Aguardando comandos de inteligência...
-                      </span>
-                    ) : (
-                      logs.map((log, i) => (
-                        <span key={i} className={log.startsWith("⚠") ? "text-red-400" : log.startsWith("✓") ? "text-[#25D366]" : "text-gray-300"}>
-                          {log}
-                        </span>
-                      ))
-                    )}
-                  </div>
-                  <form onSubmit={handleCommandSubmit} className="flex gap-2">
-                    <Input 
-                      value={command}
-                      onChange={(e) => setCommand(e.target.value)}
-                      placeholder="Comandar agentes (ex: Analisar churn)" 
-                      className="flex-1 bg-[#1A1C23] border border-white/10 text-white focus:ring-[#D4AF37] focus:border-[#D4AF37] rounded-xl"
-                    />
-                    <Button type="submit" className="bg-[#D4AF37] hover:bg-[#c4a030] text-black font-bold rounded-xl px-6">Enviar</Button>
-                  </form>
-                </div>
-              </DialogContent>
-            </Dialog>
+            {children}
           </div>
         </main>
+
+        {/* ORBITAL COMMAND RELAY (Omni) - Movido para o root do layout para evitar corte */}
+        <Dialog open={isOrbitalOpen} onOpenChange={setIsOrbitalOpen}>
+          <DialogTrigger asChild>
+            <Button 
+              size="icon" 
+              className="fixed bottom-8 right-8 md:bottom-12 md:right-12 h-16 w-16 rounded-full shadow-[0_0_40px_rgba(212,175,55,0.5)] bg-gradient-to-br from-[#D4AF37] to-amber-600 hover:from-[#c4a030] hover:to-amber-700 text-black border-2 border-[#0B0C10] animate-pulse z-[100] transition-transform hover:scale-110 flex items-center justify-center"
+            >
+              <Bot className="w-8 h-8" />
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-md bg-[#0B0C10]/95 backdrop-blur-3xl border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.8)] z-[101]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3 text-[#D4AF37] font-black tracking-widest uppercase text-lg">
+                <div className="p-2 bg-[#D4AF37]/10 rounded-lg border border-[#D4AF37]/20">
+                  <Bot className="w-6 h-6" />
+                </div>
+                Maestro Oráculo
+              </DialogTitle>
+            </DialogHeader>
+            <div className="flex flex-col gap-4 mt-2">
+              <div className="h-56 bg-[#050505] border border-white/5 rounded-xl p-4 overflow-y-auto font-mono text-sm flex flex-col gap-2 custom-scrollbar shadow-inner">
+                {logs.length === 0 ? (
+                  <span className="text-gray-500 flex items-center gap-3">
+                    <span className="relative flex h-3 w-3">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#D4AF37] opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-3 w-3 bg-[#D4AF37]"></span>
+                    </span>
+                    Aguardando comandos de inteligência...
+                  </span>
+                ) : (
+                  logs.map((log, i) => (
+                    <span key={i} className={log.startsWith("⚠") ? "text-red-400" : log.startsWith("✓") ? "text-[#25D366]" : "text-gray-300"}>
+                      {log}
+                    </span>
+                  ))
+                )}
+              </div>
+              <form onSubmit={handleCommandSubmit} className="flex gap-2">
+                <Input 
+                  value={command}
+                  onChange={(e) => setCommand(e.target.value)}
+                  placeholder="Ex: Qual o MRR atual?" 
+                  className="flex-1 bg-[#1A1C23] border border-white/10 text-white h-12 focus:ring-[#D4AF37] focus:border-[#D4AF37] rounded-xl text-base"
+                />
+                <Button type="submit" className="bg-[#D4AF37] hover:bg-[#c4a030] text-black font-black uppercase tracking-widest h-12 rounded-xl px-8 transition-transform hover:scale-105 shadow-[0_0_20px_rgba(212,175,55,0.3)]">Enviar</Button>
+              </form>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </SidebarProvider>
   );
