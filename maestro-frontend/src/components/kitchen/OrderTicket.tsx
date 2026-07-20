@@ -27,9 +27,9 @@ export function OrderTicket({ order, onUpdateStatus }: OrderTicketProps) {
   const isDelayed = elapsedMinutes >= 15;
   const isHighUrgency = order.urgencyLevel !== 'NORMAL';
 
-  let cardStyle = "border-white/10 bg-[#0a0a0a]";
-  if (isDelayed) cardStyle = "border-red-500/50 bg-red-950/20";
-  if (isHighUrgency) cardStyle = "border-[#D4AF37]/50 bg-[#D4AF37]/10";
+  let cardStyle = "border-white/5 bg-[#14151A]/80";
+  if (isDelayed) cardStyle = "border-red-500/50 bg-red-950/40 shadow-[0_0_20px_rgba(239,68,68,0.15)]";
+  if (isHighUrgency) cardStyle = "border-[#D4AF37]/50 bg-[#D4AF37]/10 shadow-[0_0_20px_rgba(212,175,55,0.15)]";
 
   return (
     <motion.div
@@ -65,13 +65,13 @@ export function OrderTicket({ order, onUpdateStatus }: OrderTicketProps) {
 
         <div className="flex gap-2 mt-auto">
           {order.status === 'PENDING' && (
-            <Button variant="outline" className="w-full text-sm" onClick={() => onUpdateStatus(order.id, 'PREPARING')}>
-              Iniciar
+            <Button variant="outline" className="w-full h-12 text-sm font-bold border-white/20 text-gray-300 hover:text-white hover:bg-white/10 transition-colors" onClick={() => onUpdateStatus(order.id, 'PREPARING')}>
+              Mandar pra Grelha
             </Button>
           )}
           {order.status === 'PREPARING' && (
-            <Button variant="primary" className="w-full text-sm shadow-[0_0_15px_rgba(212,175,55,0.4)]" onClick={() => onUpdateStatus(order.id, 'READY')}>
-              Pronto
+            <Button variant="primary" className="w-full h-12 text-sm font-black uppercase tracking-widest" onClick={() => onUpdateStatus(order.id, 'READY')}>
+              Avisar Garçom (Pronto)
             </Button>
           )}
         </div>
