@@ -12,6 +12,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
 import { KitchenModule } from './kitchen/kitchen.module';
 import { TenantsModule } from './tenants/tenants.module';
 import { AuthModule } from './auth/auth.module';
+import { OnboardingModule } from './onboarding/onboarding.module';
 
 @Module({
   imports: [
@@ -26,7 +27,8 @@ import { AuthModule } from './auth/auth.module';
     AnalyticsModule,
     KitchenModule,
     TenantsModule,
-    AuthModule
+    AuthModule,
+    OnboardingModule
   ]
 })
 export class AppModule {}

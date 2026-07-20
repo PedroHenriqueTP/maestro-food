@@ -27,6 +27,7 @@ model Tenant {
   Account           Account[]
   LedgerTransaction LedgerTransaction[]
   TenantUI          TenantUI?
+  TenantConfig      TenantConfig?
   PredictiveInsight PredictiveInsight[]
   Supplier          Supplier[]
   MarketingBudget   MarketingBudget[]
@@ -323,6 +324,28 @@ model TenantUI {
   createdAt  DateTime @default(now())
 
   @@map("tenant_ui")
+}
+
+// Business Template & Onboarding
+model TenantConfig {
+  id               String  @id @default(uuid())
+  tenantId         String  @unique
+  tenant           Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  businessType     String  @default("RESTAURANT") // ex: BAKERY, DARK_KITCHEN, RESTAURANT
+  operationModel   String  @default("TABLE_SERVICE") // ex: TABLE_SERVICE, COUNTER, DELIVERY_ONLY
+  
+  // Feature Flags
+  hasScale         Boolean @default(false)
+  hasKds           Boolean @default(true)
+  hasTableService  Boolean @default(false)
+  
+  metadata         Json?
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("tenant_configs")
 }
 
 // Predictive AI Insights
