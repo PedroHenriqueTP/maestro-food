@@ -4,12 +4,18 @@ import React, { useState } from 'react';
 import { useWaiterSocket } from '@/lib/hooks/useWaiterSocket';
 import { WaiterOrderCard } from '@/components/waiter/WaiterOrderCard';
 import { AnimatePresence, motion } from 'framer-motion';
-import { UtensilsCrossed, BellRing, Wallet, Search, Plus, Coffee, Beer } from 'lucide-react';
+import { UtensilsCrossed, BellRing, Wallet, Search, Plus, Coffee, Beer, CreditCard, Banknote, QrCode, Printer, CheckCircle2 } from 'lucide-react';
 
 export default function WaiterMobileView() {
   const { orders, isConnected, claimOrder, completeOrder } = useWaiterSocket();
   const [activeTab, setActiveTab] = useState<'mesas' | 'expedicao' | 'conta'>('mesas');
   const [selectedTable, setSelectedTable] = useState<string | null>(null);
+
+  // Estados de Checkout
+  const [checkoutStep, setCheckoutStep] = useState<'select' | 'payment' | 'success'>('select');
+  const [checkoutTable, setCheckoutTable] = useState<string | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<'credit' | 'debit' | 'pix' | 'cash' | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const readyOrders = orders.filter(o => o.status === 'READY');
   const deliveringOrders = orders.filter(o => o.status === 'DELIVERING');
@@ -130,12 +136,112 @@ export default function WaiterMobileView() {
           </motion.div>
         )}
 
-        {/* TAB: CONTA */}
+        {/* TAB: CONTA (CHECKOUT) */}
         {activeTab === 'conta' && (
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center justify-center mt-20 opacity-50">
-            <Wallet className="w-16 h-16 text-gray-500 mb-4" />
-            <p className="text-lg font-bold text-gray-400">Módulo de Pagamento</p>
-            <p className="text-sm text-gray-600">Em desenvolvimento pelo Pitbull</p>
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="space-y-6">
+            
+            {checkoutStep === 'select' && (
+              <>
+                <h2 className="text-[#D4AF37] text-sm font-black uppercase tracking-widest mb-4 flex items-center gap-2">
+                  <Wallet className="w-5 h-5" /> Fechar Conta
+                </h2>
+                <div className="grid grid-cols-3 gap-4">
+                  {mesas.filter(m => m.status === 'ocupada').map(mesa => (
+                    <button 
+                      key={mesa.id} 
+                      onClick={() => { setCheckoutTable(mesa.id); setCheckoutStep('payment'); }}
+                      className="aspect-square rounded-3xl bg-[#1A1814] border-2 border-[#D4AF37]/30 text-[#D4AF37] flex flex-col items-center justify-center transition-transform active:scale-95 shadow-lg relative overflow-hidden"
+                    >
+                      <span className="text-2xl font-black">{mesa.id}</span>
+                      <span className="text-xs font-bold text-gray-400 mt-1">R$ 145,90</span>
+                      <div className="absolute top-0 right-0 w-8 h-8 bg-[#D4AF37]/10 rounded-full blur-md"></div>
+                    </button>
+                  ))}
+                  {mesas.filter(m => m.status === 'ocupada').length === 0 && (
+                    <div className="col-span-3 text-center text-gray-500 py-10">Nenhuma mesa ocupada.</div>
+                  )}
+                </div>
+              </>
+            )}
+
+            {checkoutStep === 'payment' && checkoutTable && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-3xl font-black text-[#D4AF37]">Mesa {checkoutTable}</h2>
+                  <button onClick={() => setCheckoutStep('select')} className="px-4 py-2 bg-white/10 rounded-xl text-xs font-bold uppercase tracking-widest active:scale-95">Voltar</button>
+                </div>
+
+                <div className="bg-[#14151A] border border-white/10 rounded-3xl p-6 relative overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,0.5)]">
+                  <div className="space-y-2 mb-6 border-b border-white/10 pb-6">
+                    <div className="flex justify-between text-gray-400 text-lg"><span>Subtotal</span><span>R$ 145,90</span></div>
+                    <div className="flex justify-between text-[#D4AF37] text-lg font-bold"><span>Serviço (10%)</span><span>R$ 14,59</span></div>
+                    <div className="flex justify-between text-white text-2xl font-black mt-4 pt-4 border-t border-white/5">
+                      <span>Total</span><span>R$ 160,49</span>
+                    </div>
+                  </div>
+
+                  <h3 className="text-gray-400 text-xs font-bold tracking-widest uppercase mb-4">Método de Pagamento</h3>
+                  <div className="grid grid-cols-2 gap-3 mb-8">
+                    {[
+                      { id: 'credit', icon: <CreditCard className="w-5 h-5"/>, label: 'Crédito' },
+                      { id: 'debit', icon: <CreditCard className="w-5 h-5"/>, label: 'Débito' },
+                      { id: 'pix', icon: <QrCode className="w-5 h-5"/>, label: 'PIX' },
+                      { id: 'cash', icon: <Banknote className="w-5 h-5"/>, label: 'Dinheiro' }
+                    ].map(method => (
+                      <button 
+                        key={method.id}
+                        onClick={() => setPaymentMethod(method.id as any)}
+                        className={`flex items-center gap-3 p-4 rounded-2xl border-2 transition-all active:scale-95 ${paymentMethod === method.id ? 'bg-[#D4AF37]/10 border-[#D4AF37] text-[#D4AF37]' : 'bg-[#0B0C10] border-white/5 text-gray-400 hover:border-white/20'}`}
+                      >
+                        {method.icon}
+                        <span className="font-bold">{method.label}</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  <button 
+                    disabled={!paymentMethod || isProcessing}
+                    onClick={() => {
+                      setIsProcessing(true);
+                      setTimeout(() => { setIsProcessing(false); setCheckoutStep('success'); }, 1500);
+                    }}
+                    className={`w-full font-black uppercase tracking-widest text-lg py-5 rounded-2xl transition-all active:scale-95 shadow-[0_0_20px_rgba(212,175,55,0.4)] flex items-center justify-center gap-2
+                      ${paymentMethod ? 'bg-[#D4AF37] hover:bg-[#c4a030] text-black' : 'bg-gray-800 text-gray-500 shadow-none'}`}
+                  >
+                    {isProcessing ? (
+                      <><span className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></span> Processando...</>
+                    ) : (
+                      <><Wallet className="w-6 h-6" /> Confirmar Pagamento</>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {checkoutStep === 'success' && (
+              <div className="flex flex-col items-center justify-center text-center py-10 space-y-6">
+                <div className="w-24 h-24 bg-[#25D366]/20 rounded-full flex items-center justify-center mb-4 relative">
+                  <div className="absolute inset-0 bg-[#25D366]/20 rounded-full animate-ping"></div>
+                  <CheckCircle2 className="w-12 h-12 text-[#25D366]" />
+                </div>
+                <h2 className="text-3xl font-black text-white">Pago com Sucesso!</h2>
+                <p className="text-gray-400 font-mono tracking-widest uppercase">Mesa {checkoutTable} foi liberada.</p>
+                
+                <div className="flex gap-4 w-full mt-8">
+                  <button className="flex-1 bg-[#14151A] border border-white/10 p-4 rounded-2xl flex flex-col items-center gap-2 text-gray-300 active:scale-95">
+                    <Printer className="w-6 h-6" />
+                    <span className="text-xs font-bold uppercase tracking-wider">Imprimir Recibo</span>
+                  </button>
+                  <button 
+                    onClick={() => { setCheckoutStep('select'); setCheckoutTable(null); setPaymentMethod(null); setActiveTab('mesas'); }}
+                    className="flex-1 bg-[#D4AF37] text-black p-4 rounded-2xl flex flex-col items-center gap-2 font-black uppercase tracking-widest shadow-[0_0_20px_rgba(212,175,55,0.3)] active:scale-95"
+                  >
+                    <UtensilsCrossed className="w-6 h-6" />
+                    <span className="text-xs">Nova Mesa</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </motion.div>
         )}
       </main>
