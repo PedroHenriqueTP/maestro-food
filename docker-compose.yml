@@ -68,61 +68,7 @@ services:
     networks:
       - maestro_net
 
-  # 5. Core API (Maestro Backend NestJS)
-  maestro-backend:
-    build:
-      context: ./maestro-backend
-      dockerfile: Dockerfile
-    container_name: maestro-backend
-    ports:
-      - "3001:3001"
-    environment:
-      - NODE_ENV=production
-      - DATABASE_URL=postgresql://maestro_app_user:app_secret_123@postgres:5432/maestro?schema=public
-      - REDIS_URL=redis://redis:6379
-      - QDRANT_URL=http://qdrant:6333
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - maestro_net
 
-  # 6. Painel de Controle (Maestro Frontend Next.js)
-  maestro-frontend:
-    build:
-      context: ./maestro-frontend
-      dockerfile: Dockerfile
-    container_name: maestro-frontend
-    ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=http://localhost:3001
-    depends_on:
-      - maestro-backend
-    networks:
-      - maestro_net
-
-  # 7. O Hive (Loop de Autonomia dos Agentes)
-  maestro-agents:
-    build:
-      context: ./maestro-agents
-      dockerfile: Dockerfile
-    container_name: maestro-agents
-    environment:
-      - NODE_ENV=production
-      # Permite que os testes E2E do Playwright enxerguem o frontend via rede do Docker
-      - PLAYWRIGHT_TEST_BASE_URL=http://maestro-frontend:3000
-    depends_on:
-      - maestro-frontend
-      - n8n
-    volumes:
-      - ./maestro-frontend:/app/maestro-frontend
-      - ./maestro-backend:/app/maestro-backend
-    networks:
-      - maestro_net
 
 # Volumes nomeados removidos pois agora usamos bind mounts no diretório ./data
 # volumes:
