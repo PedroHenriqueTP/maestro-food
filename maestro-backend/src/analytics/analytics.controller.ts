@@ -19,4 +19,10 @@ export class AnalyticsController {
     const data = await this.analyticsService.getCrmCustomers();
     return res.status(HttpStatus.OK).json({ success: true, customers: data });
   }
+
+  @Get('finance')
+  async getFinanceData(@Res() res: Response) {
+    const data = await this.analyticsService.getFinance();
+    return res.status(HttpStatus.OK).json({ success: true, finance: data });
+  }
 }

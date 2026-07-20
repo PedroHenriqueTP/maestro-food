@@ -81,4 +81,87 @@ export class AnalyticsService {
       return [];
     }
   }
+
+  async getFinance() {
+    this.logger.log('Buscando dados financeiros (Prisma)...');
+    try {
+      const transactions = await this.prisma.ledgerTransaction.findMany({
+        include: {
+          entries: {
+            include: {
+              account: true
+            }
+          }
+        },
+        orderBy: { date: 'desc' },
+        take: 100 // Limite para o dashboard
+      });
+
+      if (transactions.length === 0) {
+        return { transactions: [], kpis: { revenue: 0, expense: 0, profit: 0, pendingPayable: 0 } };
+      }
+
+      let revenue = 0;
+      let expense = 0;
+      let pendingPayable = 0;
+
+      const formattedTransactions = transactions.map(t => {
+        let amount = 0;
+        let type = 'UNKNOWN';
+        let accountName = 'Unknown';
+        
+        t.entries.forEach(entry => {
+          // Lógica simplificada: se a conta é REVENUE e a entrada é CREDIT, é faturamento
+          if (entry.account.type === 'REVENUE' && entry.type === 'CREDIT') {
+            revenue += entry.amount;
+            amount = entry.amount;
+            type = 'INCOME';
+            accountName = entry.account.name;
+          }
+          // Se a conta é EXPENSE e a entrada é DEBIT, é despesa
+          if (entry.account.type === 'EXPENSE' && entry.type === 'DEBIT') {
+            expense += entry.amount;
+            amount = entry.amount;
+            type = 'EXPENSE';
+            accountName = entry.account.name;
+          }
+          // Se a conta é LIABILITY, consideramos como contas a pagar (simulação básica)
+          if (entry.account.type === 'LIABILITY' && entry.type === 'CREDIT' && t.status === 'PENDING') {
+             pendingPayable += entry.amount;
+          }
+        });
+
+        // Caso a transação não bata com o heurístico simples
+        if (amount === 0 && t.entries.length > 0) {
+          amount = t.entries[0].amount;
+          accountName = t.entries[0].account.name;
+        }
+
+        return {
+          id: t.id,
+          description: t.description,
+          date: t.date.toISOString(),
+          status: t.status,
+          amount,
+          type, // INCOME | EXPENSE
+          account: accountName,
+          method: (t.metadata as any)?.paymentMethod || 'BANK_TRANSFER'
+        };
+      });
+
+      return {
+        transactions: formattedTransactions,
+        kpis: {
+          revenue,
+          expense,
+          profit: revenue - expense,
+          pendingPayable
+        }
+      };
+
+    } catch (error) {
+      this.logger.error('Erro ao buscar dados financeiros:', error);
+      return { transactions: [], kpis: { revenue: 0, expense: 0, profit: 0, pendingPayable: 0 } };
+    }
+  }
 }
