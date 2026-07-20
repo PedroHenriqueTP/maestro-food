@@ -9,6 +9,8 @@ export default function CRMDashboard() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeRole, setActiveRole] = useState<'ADMIN_GLOBAL' | 'TENANT'>('TENANT');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filter, setFilter] = useState<'ALL' | 'VIP' | 'AT_RISK'>('ALL');
 
   // Fetch Real CRM Data
   useEffect(() => {
@@ -52,7 +54,7 @@ export default function CRMDashboard() {
   const vipCount = customers.filter(c => c.totalOrders >= 5 || c.totalSpent >= 30000).length;
 
   return (
-    <div className="min-h-screen p-6 lg:p-8 bg-[#050505] relative overflow-hidden">
+    <div className="relative w-full">
       
       {/* Background Decorativo (Glow effect) */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-[400px] bg-[#D4AF37]/5 rounded-full blur-[120px] pointer-events-none"></div>
@@ -113,6 +115,42 @@ export default function CRMDashboard() {
             <p className="text-4xl font-black text-white">{customers.length - vipCount}</p>
           </div>
         </motion.div>
+
+        {/* Toolbar CRM (Filtros e Busca) */}
+        {activeRole === 'TENANT' && (
+          <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-[#14151A] p-4 rounded-2xl border border-white/5 shadow-lg">
+            <div className="flex bg-[#0B0C10] p-1 rounded-xl border border-white/5 w-full md:w-auto">
+              <button 
+                onClick={() => setFilter('ALL')}
+                className={`flex-1 md:flex-none px-6 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${filter === 'ALL' ? 'bg-[#3B82F6] text-white shadow-[0_0_15px_rgba(59,130,246,0.3)]' : 'text-gray-500 hover:text-white'}`}
+              >
+                Todos
+              </button>
+              <button 
+                onClick={() => setFilter('VIP')}
+                className={`flex-1 md:flex-none px-6 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${filter === 'VIP' ? 'bg-[#D4AF37] text-black shadow-[0_0_15px_rgba(212,175,55,0.3)]' : 'text-gray-500 hover:text-white'}`}
+              >
+                VIPs
+              </button>
+              <button 
+                onClick={() => setFilter('AT_RISK')}
+                className={`flex-1 md:flex-none px-6 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${filter === 'AT_RISK' ? 'bg-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.3)]' : 'text-gray-500 hover:text-white'}`}
+              >
+                Em Risco
+              </button>
+            </div>
+            
+            <div className="w-full md:w-64 relative">
+              <input 
+                type="text" 
+                placeholder="Buscar cliente..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-[#0B0C10] border border-white/10 text-white text-sm px-4 py-2.5 rounded-xl focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] transition-all"
+              />
+            </div>
+          </div>
+        )}
 
         {/* Tabela CRM - Só renderiza se for Workspace do Tenant */}
         <AnimatePresence mode="wait">

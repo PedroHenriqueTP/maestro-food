@@ -53,7 +53,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-[#050505]">
+      <>
         <Sidebar className="border-r border-white/5 bg-[#0B0C10]/95 backdrop-blur-xl">
           <SidebarHeader className="p-6 border-b border-white/5">
             <div className="flex items-center gap-3">
@@ -137,8 +137,20 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           <header className="h-20 border-b border-white/5 flex items-center px-8 justify-between bg-[#0B0C10]/80 backdrop-blur-md shrink-0 sticky top-0 z-40">
             <div className="flex items-center gap-6">
               <SidebarTrigger className="text-gray-400 hover:text-white transition-colors" />
+              
               <div className="h-6 w-px bg-white/10 hidden md:block"></div>
-              <h2 className="text-sm font-semibold text-gray-300 tracking-wider uppercase hidden md:block">Workspace Executivo</h2>
+              
+              {/* Top Navigation Bar - Visível apenas em desktop */}
+              <nav className="hidden md:flex items-center gap-8 ml-4">
+                <a href="/dashboard" className="text-xs font-bold tracking-widest uppercase text-white hover:text-[#D4AF37] transition-colors">Dashboard</a>
+                <a href="/admin/crm" className="text-xs font-bold tracking-widest uppercase text-white hover:text-[#D4AF37] transition-colors">CRM</a>
+                {hasKds && (
+                  <a href="/kitchen" className="text-xs font-bold tracking-widest uppercase text-white hover:text-[#D4AF37] transition-colors">Cozinha</a>
+                )}
+                {hasTableService && (
+                  <a href="/waiter" className="text-xs font-bold tracking-widest uppercase text-white hover:text-[#D4AF37] transition-colors">Salão</a>
+                )}
+              </nav>
             </div>
             <div className="flex items-center gap-6">
               <div className="px-4 py-1.5 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/20 flex items-center gap-2">
@@ -182,7 +194,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           <DialogTrigger asChild>
             <Button 
               size="icon" 
-              className="fixed bottom-8 right-8 md:bottom-12 md:right-12 h-16 w-16 rounded-full shadow-[0_0_40px_rgba(212,175,55,0.5)] bg-gradient-to-br from-[#D4AF37] to-amber-600 hover:from-[#c4a030] hover:to-amber-700 text-black border-2 border-[#0B0C10] animate-pulse z-[100] transition-transform hover:scale-110 flex items-center justify-center"
+              className="fixed bottom-8 left-8 md:bottom-12 md:left-12 h-16 w-16 rounded-full shadow-[0_0_40px_rgba(212,175,55,0.5)] bg-gradient-to-br from-[#D4AF37] to-amber-600 hover:from-[#c4a030] hover:to-amber-700 text-black border-2 border-[#0B0C10] animate-pulse z-[100] transition-transform hover:scale-110 flex items-center justify-center"
             >
               <Bot className="w-8 h-8" />
             </Button>
@@ -226,7 +238,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             </div>
           </DialogContent>
         </Dialog>
-      </div>
+      </>
     </SidebarProvider>
   );
 }

@@ -10,6 +10,7 @@ export interface KitchenOrder {
   status: 'PENDING' | 'PREPARING' | 'READY' | 'DELIVERING' | 'COMPLETED';
   createdAt: string;
   urgencyLevel: 'NORMAL' | 'HIGH' | 'CRITICAL';
+  source?: 'Maestro' | 'iFood' | 'GrandChef' | 'Rappi';
 }
 
 export function useKitchenSocket() {
@@ -30,6 +31,7 @@ export function useKitchenSocket() {
           status: 'PREPARING',
           createdAt: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
           urgencyLevel: 'NORMAL',
+          source: 'Maestro',
         },
         {
           id: 'K-002',
@@ -37,6 +39,15 @@ export function useKitchenSocket() {
           status: 'PENDING',
           createdAt: new Date().toISOString(),
           urgencyLevel: 'HIGH',
+          source: 'Maestro',
+        },
+        {
+          id: 'EXT-992',
+          items: ['2x Combo Duplo', '1x Coca-Cola'],
+          status: 'PENDING',
+          createdAt: new Date().toISOString(),
+          urgencyLevel: 'CRITICAL',
+          source: 'iFood',
         },
       ]);
     };

@@ -6,11 +6,11 @@ import { useRouter, usePathname } from "next/navigation";
 
 // Definimos as rotas administrativas e as cores de status (Mock da Inteligência)
 const orbitalNodes = [
-  { id: "intelligence", label: "Intelligence HQ", href: "/admin/intelligence", icon: "🧠", color: "#8B5CF6", angle: 0 },
-  { id: "finance", label: "Financeiro", href: "/admin/financeiro", icon: "💰", color: "#10B981", angle: 72 },
-  { id: "crm", label: "CRM", href: "/admin/crm", icon: "👥", color: "#3B82F6", angle: 144 },
-  { id: "kitchen", label: "KDS (Cozinha)", href: "/kitchen", icon: "🍳", color: "#EF4444", angle: 216 }, // Simulando alerta
-  { id: "marketplace", label: "Marketplace", href: "/marketplace", icon: "🍔", color: "#D4AF37", angle: 288 }, // Simulando Flash Sale
+  { id: "intelligence", label: "Intelligence HQ", href: "/admin/intelligence", icon: "🧠", color: "#8B5CF6", angle: 180 },
+  { id: "finance", label: "Financeiro", href: "/admin/financeiro", icon: "💰", color: "#10B981", angle: 202.5 },
+  { id: "crm", label: "CRM", href: "/admin/crm", icon: "👥", color: "#3B82F6", angle: 225 },
+  { id: "kitchen", label: "KDS (Cozinha)", href: "/kitchen", icon: "🍳", color: "#EF4444", angle: 247.5 },
+  { id: "marketplace", label: "Marketplace", href: "/marketplace", icon: "🍔", color: "#D4AF37", angle: 270 },
 ];
 
 export function OrbitalMenu() {
