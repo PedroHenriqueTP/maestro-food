@@ -34,44 +34,54 @@ export function OrderTicket({ order, onUpdateStatus }: OrderTicketProps) {
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, scale: 0.9 }}
+      initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.9 }}
+      exit={{ opacity: 0, scale: 0.95 }}
       className="mb-4"
     >
-      <Card variant="glass" className={`p-4 border ${cardStyle} transition-colors`}>
-        <div className="flex justify-between items-start mb-4 border-b border-white/10 pb-2">
+      <Card variant="glass" className={`p-5 border-2 ${cardStyle} transition-all duration-300 relative overflow-hidden`}>
+        {isDelayed && (
+          <div className="absolute top-0 right-0 bg-red-600 text-white text-[10px] font-black uppercase px-3 py-1 rounded-bl-lg animate-pulse">
+            Atrasado
+          </div>
+        )}
+        <div className="flex justify-between items-start mb-4 border-b border-white/10 pb-3">
           <div>
-            <h3 className="text-xl font-bold font-serif text-white">#{order.id}</h3>
-            <span className={`text-xs font-black uppercase tracking-widest ${isDelayed ? 'text-red-400' : 'text-gray-400'}`}>
-              {elapsedMinutes} min atrás
+            <div className="flex items-center gap-3">
+              <h3 className="text-3xl font-black text-white uppercase font-mono">#{order.id.toString().padStart(4, '0')}</h3>
+              {order.tableNumber && (
+                <span className="bg-white/10 border border-white/20 text-white text-lg font-black px-3 py-1 rounded-lg">Mesa {order.tableNumber}</span>
+              )}
+            </div>
+            <span className={`text-sm font-black uppercase tracking-widest mt-1 block ${isDelayed ? 'text-red-400 animate-pulse' : 'text-gray-400'}`}>
+              {elapsedMinutes} min de espera
             </span>
           </div>
-          {isHighUrgency && (
-            <span className="bg-[#D4AF37] text-black text-[10px] font-black uppercase px-2 py-1 rounded shadow-lg animate-pulse">
-              Prioridade
+          {isHighUrgency && !isDelayed && (
+            <span className="bg-[#D4AF37] text-black text-xs font-black uppercase tracking-widest px-3 py-1 rounded shadow-lg">
+              VIP
             </span>
           )}
         </div>
 
-        <ul className="mb-6 space-y-2">
+        <ul className="mb-6 space-y-3">
           {order.items.map((item, idx) => (
-            <li key={idx} className="text-gray-200 text-lg flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#D4AF37]"></span>
-              {item}
+            <li key={idx} className="text-gray-100 text-xl font-bold flex items-start gap-3">
+              <span className="w-2.5 h-2.5 mt-2 rounded-full bg-[#D4AF37] flex-shrink-0 shadow-[0_0_10px_rgba(212,175,55,0.5)]"></span>
+              <span>{item}</span>
             </li>
           ))}
         </ul>
 
-        <div className="flex gap-2 mt-auto">
+        <div className="flex gap-3 mt-6">
           {order.status === 'PENDING' && (
-            <Button variant="outline" className="w-full h-12 text-sm font-bold border-white/20 text-gray-300 hover:text-white hover:bg-white/10 transition-colors" onClick={() => onUpdateStatus(order.id, 'PREPARING')}>
-              Mandar pra Grelha
+            <Button variant="primary" className="w-full h-16 text-lg font-black uppercase tracking-widest shadow-[0_0_20px_rgba(212,175,55,0.2)]" onClick={() => onUpdateStatus(order.id, 'PREPARING')}>
+              Iniciar Preparo
             </Button>
           )}
           {order.status === 'PREPARING' && (
-            <Button variant="primary" className="w-full h-12 text-sm font-black uppercase tracking-widest" onClick={() => onUpdateStatus(order.id, 'READY')}>
-              Avisar Garçom (Pronto)
+            <Button variant="primary" className="w-full h-16 text-lg font-black uppercase tracking-widest bg-green-500 text-white border-green-500 hover:bg-green-600 hover:border-green-600 shadow-[0_0_20px_rgba(34,197,94,0.3)]" onClick={() => onUpdateStatus(order.id, 'READY')}>
+              Pronto para Retirada
             </Button>
           )}
         </div>
