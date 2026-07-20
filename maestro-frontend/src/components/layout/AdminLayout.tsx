@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { Sidebar, SidebarContent, SidebarGroup, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarHeader, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { LayoutDashboard, Users, Flame, Settings, Bot } from "lucide-react";
+import { Sidebar, SidebarContent, SidebarGroup, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarHeader, SidebarProvider, SidebarTrigger, SidebarFooter } from "@/components/ui/sidebar";
+import { LayoutDashboard, Users, Flame, Settings, Bot, ChefHat, MonitorSmartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -93,7 +93,35 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                 </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroup>
+
+            <SidebarGroup className="mt-8">
+              <span className="px-4 text-[10px] font-black tracking-widest text-gray-500 uppercase mb-2 block">Operação Real-time</span>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild className="hover:bg-[#D4AF37]/10 hover:text-[#D4AF37] text-gray-400 transition-colors group">
+                    <a href="/kitchen">
+                      <ChefHat className="w-4 h-4 group-hover:animate-bounce" />
+                      <span className="font-medium">KDS Cozinha</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild className="hover:bg-[#D4AF37]/10 hover:text-[#D4AF37] text-gray-400 transition-colors">
+                    <a href="/waiter">
+                      <MonitorSmartphone className="w-4 h-4" />
+                      <span className="font-medium">PDV Frente de Caixa</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroup>
           </SidebarContent>
+          <SidebarFooter className="p-4 border-t border-white/5">
+            <button className="flex items-center gap-3 w-full p-2 rounded-xl hover:bg-white/5 transition-colors text-gray-400 hover:text-white">
+              <Settings className="w-4 h-4" />
+              <span className="text-sm font-medium">Configurações</span>
+            </button>
+          </SidebarFooter>
         </Sidebar>
 
         <main className="flex-1 flex flex-col h-screen overflow-hidden bg-gradient-to-br from-[#050505] to-[#0a0a0c]">
@@ -143,25 +171,28 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
               <DialogTrigger asChild>
                 <Button 
                   size="icon" 
-                  className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-2xl bg-primary hover:bg-primary/90 text-primary-foreground animate-pulse"
+                  className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-[0_0_30px_rgba(212,175,55,0.4)] bg-[#D4AF37] hover:bg-[#c4a030] text-black border-2 border-[#1A1C23] animate-pulse z-50 transition-all hover:scale-105"
                 >
                   <Bot className="w-6 h-6" />
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-md bg-card border-border">
+              <DialogContent className="sm:max-w-md bg-[#0B0C10]/95 backdrop-blur-2xl border border-white/10 shadow-2xl">
                 <DialogHeader>
-                  <DialogTitle className="flex items-center gap-2 text-primary">
+                  <DialogTitle className="flex items-center gap-2 text-[#D4AF37] font-black tracking-widest uppercase">
                     <Bot className="w-5 h-5" />
                     Maestro Relay
                   </DialogTitle>
                 </DialogHeader>
-                <div className="flex flex-col gap-4">
-                  <div className="h-48 bg-background border border-border rounded-md p-4 overflow-y-auto font-mono text-xs flex flex-col gap-1">
+                <div className="flex flex-col gap-4 mt-2">
+                  <div className="h-48 bg-[#050505] border border-white/5 rounded-xl p-4 overflow-y-auto font-mono text-xs flex flex-col gap-2 custom-scrollbar">
                     {logs.length === 0 ? (
-                      <span className="text-muted-foreground">Aguardando comandos...</span>
+                      <span className="text-gray-600 flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 bg-[#D4AF37] rounded-full animate-pulse"></span>
+                        Aguardando comandos de inteligência...
+                      </span>
                     ) : (
                       logs.map((log, i) => (
-                        <span key={i} className={log.startsWith("⚠") ? "text-destructive" : log.startsWith("✓") ? "text-primary" : "text-foreground"}>
+                        <span key={i} className={log.startsWith("⚠") ? "text-red-400" : log.startsWith("✓") ? "text-[#25D366]" : "text-gray-300"}>
                           {log}
                         </span>
                       ))
@@ -172,9 +203,9 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                       value={command}
                       onChange={(e) => setCommand(e.target.value)}
                       placeholder="Comandar agentes (ex: Analisar churn)" 
-                      className="flex-1 bg-background"
+                      className="flex-1 bg-[#1A1C23] border border-white/10 text-white focus:ring-[#D4AF37] focus:border-[#D4AF37] rounded-xl"
                     />
-                    <Button type="submit">Enviar</Button>
+                    <Button type="submit" className="bg-[#D4AF37] hover:bg-[#c4a030] text-black font-bold rounded-xl px-6">Enviar</Button>
                   </form>
                 </div>
               </DialogContent>
