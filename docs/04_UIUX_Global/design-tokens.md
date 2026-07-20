@@ -1,44 +1,45 @@
-# Maestro Food - Design System Tokens (Hermes Agent)
+# Design System & User Journey Wireframe - Maestro OS (B2B)
 
-Este documento define a fundação visual do projeto Maestro Food. Qualquer agente desenvolvendo interfaces (incluindo o TechLead e o Frontend Specialist) deve obedecer estritamente a estas diretrizes de CSS/Tailwind.
+## 1. User Journey (B2B Restaurante)
+1. **Descoberta:** Entra na Landing Page (Homepage) > Vê impacto visual (Dark mode luxuoso) > Entende os benefícios operacionais (Automação, RLS, Insights).
+2. **Engajamento:** Interage com as demonstrações visuais das features (Gráficos ao vivo, KDS mock) > Sente a "dor" sendo resolvida (Ex: "Menos tempo fechando caixa, mais tempo crescendo").
+3. **Conversão (Pré-venda):** Clica em "Solicitar Acesso" ou "Login Executivo" > Redirecionado para `/login`.
+4. **Onboarding:** Primeiro acesso via AuthProvider > Workspace Vazio bem desenhado (Empty States bonitos).
+5. **Operação:** Navegação via Sidebar global (AdminLayout) > Uso de CustomerTable, Growth Engine e Analytics.
 
-## Paleta de Cores (The Black Gold Concept)
+## 2. Wireframe Textual (Homepage B2B)
+- **Header:** Logo dourado Maestro. Links: Soluções, Intelligence, Cases. CTA primário: "Login Executivo".
+- **Hero Section:** Título Forte ("O Sistema Operacional Definitivo para Food Service"). Subtítulo focado em controle e IA. Fundo acrílico com glow dourado.
+- **Features Grid (Bento Box):** Exposição das capacidades do backend:
+  - Card 1: "Real-time Operations" (Websockets/KDS)
+  - Card 2: "Security & Tenants" (JWT + RLS Supabase)
+  - Card 3: "AI Agents" (Pitbull & N8n integração)
+- **Footer:** Links de conformidade e institucional.
 
-A paleta é focada em altíssimo contraste para ambientes com pouca iluminação (cozinha/salão) e requinte (cliente final).
+## 3. Design Tokens Globais (Pitbull Edition)
+- **Cores Primárias:**
+  - Background: `#050505` (Deep Black)
+  - Surface: `#0B0C10` (Charcoal) e `#14151A` (Elevation 1)
+  - Brand (Accent): `#D4AF37` (Maestro Gold)
+  - Warning/Destructive: `#ef4444`
+  - Success: `#25D366`
+- **Tipografia:**
+  - Fontes baseadas em `Geist` e `Geist Mono` para números/códigos.
+  - Tracking (letter-spacing) amplo para headers.
+- **Borders & Shadows:**
+  - Borders: `border-white/5` ou `border-white/10` para divisões sutis.
+  - Shadows: `shadow-[0_0_20px_rgba(212,175,55,0.15)]` para botões primários. Glow suave.
+- **Efeitos:**
+  - `backdrop-blur-xl` e `backdrop-blur-2xl` para glassmorphism.
+  - Micro-animações no hover (`transition-all duration-300`).
 
-| Nome | Variável CSS | Classe Tailwind Sugerida | Hex Code | Uso Principal |
-| :--- | :--- | :--- | :--- | :--- |
-| **Onyx Black** | `--color-onyx` | `bg-[#050505]` | `#050505` | Background Principal |
-| **Matte Black** | `--color-matte` | `bg-[#0a0a0a]` | `#0a0a0a` | Background de Cards e Sidebars |
-| **Maestro Gold** | `--color-gold-500` | `text-[#D4AF37]` | `#D4AF37` | Primária, Call to Actions, H1 |
-| **Muted Gold** | `--color-gold-600` | `text-[#aa8c2c]` | `#aa8c2c` | Hover States (Primária) |
-| **Light Gold** | `--color-gold-400` | `text-[#f1e5ac]` | `#f1e5ac` | Textos em destaque sobre fundos pretos |
-| **White Glass** | N/A | `bg-white/5` | `rgba(255,255,255,0.05)` | Fundo para Glassmorphism |
-
-## Tipografia (The Elegance)
-
-- **Headings (Cinzel):** Utilizada exclusivamente para títulos principais, logos e comunicações premium de brand.
-  - `font-family: 'Cinzel', serif;`
-- **Corpo (Inter):** Utilizada para todo o texto funcional, leitura rápida de cozinha e parágrafos do marketplace.
-  - `font-family: 'Inter', sans-serif;`
-
-## Física e Animação (Liquid Flow - Framer Motion)
-
-Todas as animações de interface devem parecer orgânicas e responsivas ao toque humano. 
-Utilizamos parâmetros padronizados de *spring* no Framer Motion:
-
-```javascript
-// Padrão de Hover (Botões e Cards Interativos)
-whileHover={{ scale: 1.02 }}
-whileTap={{ scale: 0.98 }}
-
-// Inserção em Lista (Carrinho, Notificações)
-initial={{ opacity: 0, x: 20 }}
-animate={{ opacity: 1, x: 0 }}
-exit={{ opacity: 0, scale: 0.8 }}
-layout // Para realocamento suave de elementos irmãos
+## 4. Estrutura de Pastas Recomendada (UI/UX)
+```text
+maestro-frontend/src/
+├── components/
+│   ├── ui/               # Componentes burros (shadcn, botões, inputs)
+│   ├── layout/           # AdminLayout, PublicLayout, Sidebar, Navbar
+│   ├── crm/              # CustomerTable, LeadCard
+│   ├── dashboard/        # Gráficos, KPIs, Widgets
+│   └── marketing/        # Componentes da Landing Page B2B
 ```
-
-## Acessibilidade (Hermes AAA)
-- Todo texto que sobrepor fundo Onyx Black (`#050505`) deve possuir no mínimo opacidade de 70% (`text-gray-300`) para leitura fluída, ou 100% (`text-white`) para leitura obrigatória.
-- É estritamente proibido o uso de botões sem focus state aparente. Use `focus:ring-2 focus:ring-[#D4AF37]`.
