@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import { formatCurrency, formatDate } from "../../../lib/utils/formatters";
 import { useAuth } from "@/contexts/AuthContext";
+import { Search, ChevronDown, ChevronUp, Star, Gift, MessageCircle, Clock, ShieldAlert } from "lucide-react";
 
 export interface Customer {
   id: string;
@@ -60,7 +61,25 @@ export function CustomerTable({ customers, isLoading }: CustomerTableProps) {
   };
 
   return (
-    <div className="w-full bg-[#14151A]/80 backdrop-blur-xl border border-white/5 rounded-2xl shadow-2xl overflow-hidden">
+    <div className="w-full bg-[#0a0a0c]/80 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+      
+      {/* Header com Busca */}
+      <div className="p-6 border-b border-white/5 flex flex-col md:flex-row items-center justify-between gap-4 bg-gradient-to-r from-transparent via-[#14151A]/50 to-transparent">
+        <div>
+          <h2 className="text-xl font-bold text-white flex items-center gap-2">
+            <Star className="w-5 h-5 text-[#D4AF37]" /> Base de Clientes
+          </h2>
+          <p className="text-sm text-gray-400 mt-1">Gerencie e interaja com seus consumidores</p>
+        </div>
+        <div className="relative w-full md:w-72">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+          <input 
+            type="text"
+            placeholder="Buscar cliente..."
+            className="w-full bg-[#1A1C23] border border-gray-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37]/50 transition-all placeholder:text-gray-600"
+          />
+        </div>
+      </div>
       
       {/* Grid Header */}
       <div className="grid grid-cols-5 gap-4 px-6 py-4 text-xs uppercase bg-[#0B0C10]/90 text-gray-500 border-b border-gray-800 tracking-widest font-semibold sticky top-0 z-10 backdrop-blur-md">
@@ -105,14 +124,18 @@ export function CustomerTable({ customers, isLoading }: CustomerTableProps) {
                   `}
                 >
                   {/* Linha Principal */}
-                  <motion.div layout className="grid grid-cols-5 gap-4 px-6 py-5 items-center">
+                  <motion.div layout className="grid grid-cols-5 gap-4 px-6 py-4 items-center group">
                     
                     <div className="col-span-2 md:col-span-1 flex items-center gap-4">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm transition-all duration-500
-                        ${vip ? 'bg-[#D4AF37] text-black shadow-[0_0_15px_rgba(212,175,55,0.4)]' : 'bg-gray-800/80 text-gray-400'}`}>
+                      <div className={`w-11 h-11 rounded-xl flex items-center justify-center font-bold text-lg transition-all duration-500 relative
+                        ${vip ? 'bg-gradient-to-br from-[#D4AF37] to-amber-700 text-black shadow-[0_0_20px_rgba(212,175,55,0.3)]' : 'bg-gray-800/80 text-gray-400 group-hover:bg-gray-700'}`}>
                         {customer.name.charAt(0).toUpperCase()}
+                        {vip && <div className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full border-2 border-[#1A1C23]" />}
                       </div>
-                      <span className={`font-medium ${vip ? 'text-white' : 'text-gray-300'}`}>{customer.name}</span>
+                      <div className="flex flex-col">
+                        <span className={`font-semibold ${vip ? 'text-white' : 'text-gray-200'}`}>{customer.name}</span>
+                        {vip && <span className="text-[10px] text-[#D4AF37] uppercase tracking-wider font-bold">Cliente Elite</span>}
+                      </div>
                     </div>
 
                     <div className="hidden md:block font-mono text-gray-400 text-sm">
@@ -128,10 +151,17 @@ export function CustomerTable({ customers, isLoading }: CustomerTableProps) {
                     </div>
 
                     <div className="text-center">
-                      <span className={`inline-flex items-center px-3 py-1 rounded-md text-xs font-black tracking-widest uppercase transition-all
-                        ${vip ? 'bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30 shadow-[0_0_10px_rgba(212,175,55,0.1)]' : 'bg-gray-800/50 text-gray-500 border border-gray-700/50'}`}>
-                        {vip ? 'VIP' : 'Reg'}
-                      </span>
+                      <div className="flex items-center justify-center gap-3">
+                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-black tracking-widest uppercase transition-all
+                          ${vip ? 'bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/40 shadow-[0_0_15px_rgba(212,175,55,0.2)]' : 'bg-gray-800/60 text-gray-400 border border-gray-700/50'}`}>
+                          {vip ? 'VIP' : 'REG'}
+                        </span>
+                        {isExpanded ? (
+                          <ChevronUp className="w-5 h-5 text-gray-500" />
+                        ) : (
+                          <ChevronDown className="w-5 h-5 text-gray-600 group-hover:text-[#D4AF37] transition-colors" />
+                        )}
+                      </div>
                     </div>
 
                   </motion.div>
@@ -147,23 +177,31 @@ export function CustomerTable({ customers, isLoading }: CustomerTableProps) {
                         className="bg-[#0B0C10]/50 border-t border-gray-800/50"
                       >
                         <div className="px-6 py-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-                          <div>
-                            <span className="text-xs text-gray-500 uppercase tracking-widest font-bold">Última Visita</span>
-                            <p className="text-lg text-gray-200 mt-1">{formatDate(customer.lastOrderDate)}</p>
+                          <div className="flex items-start gap-4">
+                            <div className="p-3 bg-gray-800/50 rounded-xl text-gray-400">
+                              <Clock className="w-5 h-5" />
+                            </div>
+                            <div>
+                              <span className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Última Visita</span>
+                              <p className="text-lg text-gray-200 mt-0.5 font-medium">{formatDate(customer.lastOrderDate)}</p>
+                            </div>
                           </div>
-                          <div>
-                            <span className="text-xs text-gray-500 uppercase tracking-widest font-bold">Ações Inteligentes</span>
+                          <div className="md:col-span-2 border-l border-gray-800/50 pl-6">
+                            <span className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Ações Inteligentes</span>
                             {isAdminOrManager ? (
-                              <div className="flex gap-3 mt-2">
-                                <button className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg text-sm transition-colors border border-white/10">
-                                  Emitir Cupom Especial
+                              <div className="flex gap-3 mt-3">
+                                <button className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg text-sm font-medium transition-colors border border-white/10">
+                                  <Gift className="w-4 h-4 text-[#D4AF37]" /> Emitir Cupom
                                 </button>
-                                <button className="px-4 py-2 bg-[#D4AF37]/10 hover:bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30 rounded-lg text-sm transition-colors shadow-[0_0_10px_rgba(212,175,55,0.1)]">
-                                  WhatsApp Direto
+                                <button className="flex items-center gap-2 px-4 py-2 bg-[#25D366]/10 hover:bg-[#25D366]/20 text-[#25D366] border border-[#25D366]/30 rounded-lg text-sm font-medium transition-colors shadow-[0_0_15px_rgba(37,211,102,0.15)]">
+                                  <MessageCircle className="w-4 h-4" /> WhatsApp Direto
                                 </button>
                               </div>
                             ) : (
-                              <p className="text-sm text-gray-600 mt-2 italic">Você não tem permissão para realizar ações.</p>
+                              <div className="flex items-center gap-2 mt-3 p-3 bg-red-500/10 border border-red-500/20 rounded-lg w-fit">
+                                <ShieldAlert className="w-4 h-4 text-red-400" />
+                                <p className="text-xs text-red-300 font-medium tracking-wide">Acesso restrito a Gerência</p>
+                              </div>
                             )}
                           </div>
                           <div className="flex items-center justify-end">
