@@ -6,11 +6,22 @@ import { LayoutDashboard, Users, Flame, Settings, Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { useAuthStore } from "../../stores/useAuthStore";
+import { useRouter } from "next/navigation";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
   const [command, setCommand] = useState("");
   const [isOrbitalOpen, setIsOrbitalOpen] = useState(false);
   const [logs, setLogs] = useState<string[]>([]);
+  const { user, logout } = useAuthStore();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    document.cookie = "maestro_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    logout();
+    router.push('/login');
+  };
 
   const handleCommandSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,8 +101,28 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             </div>
             <div className="flex items-center gap-4">
               <Button variant="outline" size="sm" className="border-primary/20 text-primary">
-                Pizzaria Napolitana (Tenant)
+                {user ? user.tenantId : 'Carregando...'}
               </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                    <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">
+                      {user ? user.name.charAt(0) : 'U'}
+                    </div>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 bg-card border-border">
+                  <div className="flex items-center justify-start gap-2 p-2">
+                    <div className="flex flex-col space-y-1 leading-none">
+                      <p className="font-medium">{user ? user.name : 'Usuário'}</p>
+                      <p className="text-xs text-muted-foreground">{user ? user.email : ''}</p>
+                    </div>
+                  </div>
+                  <DropdownMenuItem onClick={handleLogout} className="text-destructive cursor-pointer">
+                    Sair
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </header>
           

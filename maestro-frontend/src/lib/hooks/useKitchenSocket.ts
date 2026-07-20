@@ -41,10 +41,10 @@ export function useKitchenSocket() {
 
     // 2. Subscribe to Supabase Realtime
     const channel = supabase
-      .channel('public:orders')
+      .channel(`tenant:${tenantId}:orders`)
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'orders' },
+        { event: '*', schema: 'public', table: 'orders', filter: `tenant_id=eq.${tenantId}` },
         (payload) => {
           console.log('Realtime Order Change:', payload);
           // Em um DB real, atualizaríamos o estado aqui

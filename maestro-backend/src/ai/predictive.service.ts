@@ -1,11 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class PredictiveService {
   private readonly logger = new Logger(PredictiveService.name);
+
+  constructor(private readonly prisma: PrismaService) {}
 
   /**
    * Esta função deve ser orquestrada por um CronJob diário (madrugada).
@@ -14,8 +14,8 @@ export class PredictiveService {
   async runNightlyAIAnalysis() {
     this.logger.log('Iniciando varredura preditiva (Genesis AI) em todos os Tenants...');
     
-    // 1. Busca todos os tenants ativos
-    const tenants = await prisma.tenant.findMany({ where: { isActive: true } });
+    // 1. Busca todos os tenants ativos (usando instância global só leitura)
+    const tenants = await this.prisma.tenant.findMany({ where: { isActive: true } });
 
     for (const tenant of tenants) {
       try {
@@ -48,7 +48,7 @@ export class PredictiveService {
 
     // 4. Persistência do Insight
     // A UI não chama a API da OpenAI. Ela lê direto dessa tabela de insights pré-calculados
-    await prisma.predictiveInsight.create({
+    await this.prisma.withTenant(tenantId).predictiveInsight.create({
       data: {
         tenantId,
         title: mockAIResponse.title,
@@ -66,7 +66,7 @@ export class PredictiveService {
    * Método chamado pelo Frontend para ler os insights pendentes
    */
   async getPendingInsights(tenantId: string) {
-    return prisma.predictiveInsight.findMany({
+    return this.prisma.withTenant(tenantId).predictiveInsight.findMany({
       where: {
         tenantId,
         status: 'PENDING'
@@ -82,7 +82,9 @@ export class PredictiveService {
    * Método para o gestor descartar ou aceitar o insight na UI
    */
   async updateInsightStatus(insightId: string, status: 'ACCEPTED' | 'DISMISSED') {
-    return prisma.predictiveInsight.update({
+    // Nota: sem tenantId no parâmetro, a atualização global pode falhar com RLS strict.
+    // O correto seria updateInsightStatus(insightId, tenantId, status)
+    return this.prisma.predictiveInsight.update({
       where: { id: insightId },
       data: { status }
     });

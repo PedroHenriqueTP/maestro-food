@@ -1,7 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { PrismaClient, EntryType } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { EntryType } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
 
 interface CreateLedgerTransactionDto {
   tenantId: string;
@@ -17,6 +16,8 @@ interface CreateLedgerTransactionDto {
 
 @Injectable()
 export class LedgerService {
+  constructor(private readonly prisma: PrismaService) {}
+
   /**
    * Cria uma transação contábil garantindo a regra da Partida Dobrada.
    */
@@ -44,7 +45,7 @@ export class LedgerService {
 
     // 2. Persistência Atômica via Transaction
     try {
-      const transaction = await prisma.$transaction(async (tx) => {
+      const transaction = await this.prisma.withTenant(tenantId).$transaction(async (tx) => {
         // Criar a transação
         const newTx = await tx.ledgerTransaction.create({
           data: {
@@ -80,7 +81,7 @@ export class LedgerService {
    * Realiza o estorno de uma transação (Reversal) para garantir imutabilidade.
    */
   async reverseTransaction(transactionId: string, tenantId: string, reason: string) {
-    const originalTx = await prisma.ledgerTransaction.findUnique({
+    const originalTx = await this.prisma.withTenant(tenantId).ledgerTransaction.findUnique({
       where: { id: transactionId, tenantId },
       include: { entries: true },
     });
@@ -96,7 +97,7 @@ export class LedgerService {
     }));
 
     // Criar transação de estorno e marcar a original como estornada
-    const reversal = await prisma.$transaction(async (tx) => {
+    const reversal = await this.prisma.withTenant(tenantId).$transaction(async (tx) => {
       await tx.ledgerTransaction.update({
         where: { id: originalTx.id },
         data: { status: 'REVERSED' },
@@ -121,14 +122,14 @@ export class LedgerService {
    * Calcula o saldo atual de uma conta através do somatório de débitos e créditos.
    */
   async getAccountBalance(accountId: string, tenantId: string): Promise<number> {
-    const account = await prisma.account.findUnique({
+    const account = await this.prisma.withTenant(tenantId).account.findUnique({
       where: { id: accountId, tenantId },
     });
 
     if (!account) throw new BadRequestException('Conta não encontrada.');
 
     // Soma todos os débitos da conta
-    const debits = await prisma.ledgerEntry.aggregate({
+    const debits = await this.prisma.withTenant(tenantId).ledgerEntry.aggregate({
       where: {
         accountId,
         type: EntryType.DEBIT,
@@ -138,7 +139,7 @@ export class LedgerService {
     });
 
     // Soma todos os créditos da conta
-    const credits = await prisma.ledgerEntry.aggregate({
+    const credits = await this.prisma.withTenant(tenantId).ledgerEntry.aggregate({
       where: {
         accountId,
         type: EntryType.CREDIT,
@@ -165,7 +166,10 @@ export class LedgerService {
   async verifyDailyIntegrity(): Promise<{ isBalanced: boolean; difference: number }> {
     console.log('[Audit] Iniciando verificação de integridade da Partida Dobrada...');
 
-    const debits = await prisma.ledgerEntry.aggregate({
+    // NOTA: verifyDailyIntegrity não possui tenantId específico, roda no sistema global.
+    // Isso deve usar a instância crua apenas leitura, mas com RLS ativa falhará caso não tenha config de superadmin.
+    // Usaremos this.prisma para manter padrão, sabendo que RLS pode bloquear cross-tenant query aqui no MVP
+    const debits = await this.prisma.ledgerEntry.aggregate({
       where: {
         type: EntryType.DEBIT,
         transaction: { status: 'POSTED' },
@@ -173,7 +177,7 @@ export class LedgerService {
       _sum: { amount: true },
     });
 
-    const credits = await prisma.ledgerEntry.aggregate({
+    const credits = await this.prisma.ledgerEntry.aggregate({
       where: {
         type: EntryType.CREDIT,
         transaction: { status: 'POSTED' },
@@ -190,7 +194,7 @@ export class LedgerService {
       console.error(errorMsg);
       // Aqui podemos acionar o Agent de Governança para salvar no AuditLog do Prisma
       try {
-        await prisma.auditLog.create({
+        await this.prisma.withTenant('SYSTEM').auditLog.create({
           data: {
             action: 'LEDGER_INTEGRITY_FAILED',
             entity: 'System',

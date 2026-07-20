@@ -4,11 +4,12 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../supabase';
 import { KitchenOrder } from './useKitchenSocket';
 
-export function useWaiterSocket() {
+export function useWaiterSocket(tenantId: string) {
   const [orders, setOrders] = useState<KitchenOrder[]>([]);
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
+    if (!tenantId) return;
     // 1. Fetch initial state
     const fetchOrders = async () => {
       // Usando Mocks em vez do BD real por enquanto
@@ -19,10 +20,10 @@ export function useWaiterSocket() {
 
     // 2. Subscribe to Supabase Realtime (Filtrando apenas READY e DELIVERING se fosse no BD real)
     const channel = supabase
-      .channel('public:orders:waiter')
+      .channel(`tenant:${tenantId}:orders:waiter`)
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'orders', filter: 'status=in.(READY,DELIVERING)' },
+        { event: '*', schema: 'public', table: 'orders', filter: `tenant_id=eq.${tenantId}` },
         (payload) => {
           console.log('Realtime Waiter Change:', payload);
           // Em um DB real, atualizaríamos o estado aqui

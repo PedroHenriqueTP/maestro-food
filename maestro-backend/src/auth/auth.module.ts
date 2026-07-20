@@ -3,6 +3,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './jwt.strategy';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { AuthController } from './auth.controller';
 
 export const JWT_SECRET = process.env.JWT_SECRET || 'super_secret_maestro_key_2026';
 
@@ -14,6 +15,7 @@ export const JWT_SECRET = process.env.JWT_SECRET || 'super_secret_maestro_key_20
       signOptions: { expiresIn: '1d' }, // Token válido por 1 dia
     }),
   ],
+  controllers: [AuthController],
   providers: [JwtStrategy, JwtAuthGuard],
   exports: [JwtAuthGuard, JwtModule],
 })

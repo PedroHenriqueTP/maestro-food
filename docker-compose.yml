@@ -13,6 +13,7 @@ services:
       - "5432:5432"
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
+      - ./postgres-init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - maestro_net
     healthcheck:
@@ -77,7 +78,7 @@ services:
       - "3001:3001"
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/maestro?schema=public
+      - DATABASE_URL=postgresql://maestro_app_user:app_secret_123@postgres:5432/maestro?schema=public
       - REDIS_URL=redis://redis:6379
       - QDRANT_URL=http://qdrant:6333
     depends_on:
