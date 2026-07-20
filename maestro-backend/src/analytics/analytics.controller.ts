@@ -25,4 +25,10 @@ export class AnalyticsController {
     const data = await this.analyticsService.getFinance();
     return res.status(HttpStatus.OK).json({ success: true, finance: data });
   }
+
+  @Get('public/menu')
+  async getPublicMenu(@Res() res: Response) {
+    const data = await this.analyticsService.getPublicMenu();
+    return res.status(HttpStatus.OK).json({ success: true, menu: data });
+  }
 }

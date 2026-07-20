@@ -5,21 +5,50 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
-import { UtensilsCrossed, Plus, Minus, ShoppingBag, X, Info } from 'lucide-react';
+import { useEffect } from 'react';
+import { UtensilsCrossed, Plus, Minus, ShoppingBag, X, Info, Search } from 'lucide-react';
 
-const CATEGORIES = ['Destaques', 'Burgers', 'Bebidas', 'Sobremesas'];
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  description: string;
+  img: string;
+  isActive: boolean;
+}
 
-const MENU_ITEMS = [
-  { id: '1', category: 'Destaques', name: 'Wagyu Burger', price: 89.90, desc: 'Pão brioche selado na manteiga, 200g Wagyu, Queijo Trufado e maionese da casa.', img: 'bg-gradient-to-br from-amber-700 to-amber-900' },
-  { id: '2', category: 'Destaques', name: 'Salmão Grelhado', price: 112.50, desc: 'Com purê de batata baroa e aspargos frescos salteados no azeite.', img: 'bg-gradient-to-br from-orange-400 to-orange-600' },
-  { id: '3', category: 'Burgers', name: 'Smash Duplo', price: 45.00, desc: 'Pão de batata, 2x smash 90g, cheddar inglês, bacon caramelizado.', img: 'bg-gradient-to-br from-amber-600 to-amber-800' },
-  { id: '4', category: 'Bebidas', name: 'Negroni Envelhecido', price: 42.00, desc: 'Envelhecido em barril de carvalho por 30 dias.', img: 'bg-gradient-to-br from-red-600 to-red-900' },
-];
+interface Category {
+  id: string;
+  name: string;
+  products: Product[];
+}
 
 export default function OrderFlow() {
+  const [menu, setMenu] = useState<Category[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [cart, setCart] = useState<{id: string, name: string, price: number, qty: number, obs?: string}[]>([]);
-  const [activeCategory, setActiveCategory] = useState('Destaques');
+  const [activeCategory, setActiveCategory] = useState<string>('');
   const [isCartOpen, setIsCartOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchMenu = async () => {
+      try {
+        const res = await fetch('http://localhost:3001/analytics/public/menu');
+        if (res.ok) {
+          const json = await res.json();
+          setMenu(json.menu || []);
+          if (json.menu && json.menu.length > 0) {
+            setActiveCategory(json.menu[0].name);
+          }
+        }
+      } catch (error) {
+        console.error("Erro ao buscar cardápio:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchMenu();
+  }, []);
 
   const addToCart = (item: any) => {
     const existing = cart.find(c => c.id === item.id);
@@ -58,25 +87,33 @@ export default function OrderFlow() {
           
           {/* Categories Horizontal Scroll */}
           <div className="flex overflow-x-auto gap-3 pb-2 custom-scrollbar hide-scrollbar snap-x">
-            {CATEGORIES.map(cat => (
+            {menu.map(cat => (
               <button 
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
+                key={cat.id}
+                onClick={() => setActiveCategory(cat.name)}
                 className={`snap-start whitespace-nowrap px-6 py-2.5 rounded-full text-sm font-bold uppercase tracking-wider transition-all active:scale-95 border-2 ${
-                  activeCategory === cat ? 'bg-[#D4AF37] text-black border-[#D4AF37] shadow-[0_0_15px_rgba(212,175,55,0.4)]' : 'bg-transparent text-gray-400 border-white/10 hover:border-white/30'
+                  activeCategory === cat.name ? 'bg-[#D4AF37] text-black border-[#D4AF37] shadow-[0_0_15px_rgba(212,175,55,0.4)]' : 'bg-transparent text-gray-400 border-white/10 hover:border-white/30'
                 }`}
               >
-                {cat}
+                {cat.name}
               </button>
             ))}
+            {menu.length === 0 && !isLoading && (
+              <span className="text-gray-500 text-sm">Nenhuma categoria disponível</span>
+            )}
           </div>
         </header>
 
         <div className="p-6">
-          <h2 className="text-xl font-bold text-white mb-6 uppercase tracking-widest border-b border-white/10 pb-2">{activeCategory}</h2>
+          <h2 className="text-xl font-bold text-white mb-6 uppercase tracking-widest border-b border-white/10 pb-2">{activeCategory || 'Menu'}</h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {MENU_ITEMS.filter(i => i.category === activeCategory).map((item) => (
+          {isLoading ? (
+            <div className="flex justify-center p-12">
+              <div className="w-8 h-8 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {menu.find(c => c.name === activeCategory)?.products?.map((item) => (
               <motion.div 
                 key={item.id}
                 layout
@@ -91,7 +128,7 @@ export default function OrderFlow() {
                 <div className="p-5 flex-1 flex flex-col justify-between -mt-6 relative z-20 bg-[#14151A] rounded-t-3xl">
                   <div>
                     <h3 className="text-xl font-black text-white">{item.name}</h3>
-                    <p className="text-sm text-gray-400 mt-2 leading-relaxed line-clamp-2">{item.desc}</p>
+                    <p className="text-sm text-gray-400 mt-2 leading-relaxed line-clamp-2">{item.description}</p>
                   </div>
                   
                   <div className="mt-6 flex items-center justify-between">
@@ -121,7 +158,13 @@ export default function OrderFlow() {
                 </div>
               </motion.div>
             ))}
+            {menu.find(c => c.name === activeCategory)?.products?.length === 0 && (
+              <div className="col-span-full py-12 text-center text-gray-500">
+                Esta categoria não possui pratos ativos no momento.
+              </div>
+            )}
           </div>
+          )}
         </div>
       </div>
 

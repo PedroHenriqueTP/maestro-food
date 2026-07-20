@@ -164,4 +164,59 @@ export class AnalyticsService {
       return { transactions: [], kpis: { revenue: 0, expense: 0, profit: 0, pendingPayable: 0 } };
     }
   }
+
+  async getPublicMenu() {
+    this.logger.log('Buscando cardápio público (Prisma)...');
+    try {
+      const categories = await this.prisma.category.findMany({
+        include: {
+          products: {
+            where: { isActive: true },
+            include: {
+              modifierGroups: {
+                include: {
+                  modifierGroup: {
+                    include: { modifiers: true }
+                  }
+                }
+              }
+            }
+          }
+        },
+        orderBy: { sortOrder: 'asc' }
+      });
+
+      if (categories.length === 0) {
+        // Fallback de mock se DB vazio
+        return [
+          {
+            id: '1',
+            name: 'Destaques',
+            products: [
+              { id: '1', name: 'Wagyu Burger', price: 89.90, description: 'Pão brioche selado na manteiga, 200g Wagyu.', img: 'bg-gradient-to-br from-amber-700 to-amber-900', isActive: true },
+              { id: '2', name: 'Salmão Grelhado', price: 112.50, description: 'Com purê de batata baroa.', img: 'bg-gradient-to-br from-orange-400 to-orange-600', isActive: true },
+            ]
+          }
+        ];
+      }
+
+      return categories.map(cat => ({
+        id: cat.id,
+        name: cat.name,
+        products: cat.products.map(p => ({
+          id: p.id,
+          name: p.name,
+          price: Number(p.price),
+          description: p.description,
+          img: 'bg-gradient-to-br from-gray-700 to-gray-900', // Mock visual class
+          isActive: p.isActive,
+          modifiers: p.modifierGroups.map(mg => mg.modifierGroup)
+        }))
+      }));
+
+    } catch (error) {
+      this.logger.error('Erro ao buscar menu:', error);
+      return [];
+    }
+  }
 }
